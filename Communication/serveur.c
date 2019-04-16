@@ -24,11 +24,13 @@ int main(int argc, char **argv){
     struct sockaddr_in addClient;	/* adresse de la socket client connectee */   
     bool validation = true;    // utilisation de la validation
     bool timeout = true;       // utilisation de la limite deu temps
-    bool fait1=false,fait2=false;
+    bool fait1=false,fait2=false,firstIsFirst=true,firstIsSecond=false;
     char* time = "--noTimeout";
     char* valid = "--noValid";
     TPartieReq requetePartie1,requetePartie2;
     TPartieRep reponsePartie1,reponsePartie2;
+    TSensTetePiece sensJoueur1,sensJoueur2;
+    TCoupReq requeteCoupJoueur1,requeteCoupJoueur2;
     fd_set  readSet; 
 
 
@@ -116,10 +118,18 @@ int main(int argc, char **argv){
 				shutdown(joueur1, SHUT_RDWR); close(joueur1);
 			return -4;
 			}
-			printf("Recu demande partie : nom %s \t\t/ sens SUD\n",requetePartie1.nomJoueur);
-			if (boucle1==0) reponsePartie1.validSensTete = OK;
-			else reponsePartie1.validSensTete = KO;
-
+			if (requetePartie1.piece == SUD) printf("Recu demande partie : nom %s \t\t/ sens SUD\n",requetePartie1.nomJoueur);
+			if (requetePartie1.piece == NORD) printf("Recu demande partie : nom %s \t\t/ sens NORD\n",requetePartie1.nomJoueur);
+			if (boucle1==0) {reponsePartie1.validSensTete = OK;}
+			else{
+				if (requetePartie1.piece == requetePartie2.piece)
+				{
+					reponsePartie1.validSensTete = KO;
+				}
+				else{
+					reponsePartie1.validSensTete == OK;
+				}
+			} 
 			strncpy(reponsePartie1.nomAdvers, "bidon2", T_NOM);
 			reponsePartie1.err = 0;
 			err = send(joueur1, &reponsePartie1, sizeof(TPartieRep), 0);
@@ -130,8 +140,10 @@ int main(int argc, char **argv){
     		}
 	    	boucle1++;
 	    	fait1 = true;
+	    	
+	    	
 	    }
-	    printf("on traite la deuxieme maintenant\n");
+	    
 	    if (FD_ISSET(joueur2,&readSet)!=0 && !fait2)
 	    {
 	    	err = recv(joueur2, &requetePartie2, sizeof(TPartieReq), 0);
@@ -140,9 +152,18 @@ int main(int argc, char **argv){
 				shutdown(joueur2, SHUT_RDWR); close(joueur2);
 			return -4;
 			}
-			printf("Recu demande partie : nom %s \t\t/ sens SUD\n",requetePartie2.nomJoueur);
-			if (boucle1==0) reponsePartie2.validSensTete = OK;
-			else reponsePartie2.validSensTete = KO;
+			if (requetePartie2.piece == SUD) printf("Recu demande partie : nom %s \t\t/ sens SUD\n",requetePartie2.nomJoueur);
+			if (requetePartie2.piece == NORD) printf("Recu demande partie : nom %s \t\t/ sens NORD\n",requetePartie2.nomJoueur);
+			if (boucle1==0) {reponsePartie2.validSensTete = OK;}
+			else{
+				if (requetePartie2.piece == requetePartie1.piece)
+				{
+					reponsePartie2.validSensTete = KO;
+				}
+				else{
+					reponsePartie2.validSensTete == OK;
+				}
+			} 
 			strncpy(reponsePartie2.nomAdvers, "bidon1", T_NOM);
 			reponsePartie2.err = 0;
 			err = send(joueur2, &reponsePartie2, sizeof(TPartieRep), 0);
@@ -154,7 +175,60 @@ int main(int argc, char **argv){
 	    	boucle1++;
 	    	fait2 = true;
 	    }
-	}	
+	}
+	printf("Pieces des joueurs validées : \n");
+
+	//attribution des sens aux joueur
+	if ((requetePartie1.piece == SUD && reponsePartie1.validSensTete == OK) || (requetePartie1.piece == NORD && reponsePartie1.validSensTete == KO)){
+	 printf("joueur %s  -sens : SUD \n",requetePartie1.nomJoueur);
+	 sensJoueur1 = SUD;
+	 firstIsFirst = true;
+	}
+
+	if ((requetePartie1.piece == NORD && reponsePartie1.validSensTete == OK) || (requetePartie1.piece == SUD && reponsePartie1.validSensTete == KO)){
+	 printf("joueur %s  -sens : NORD \n",requetePartie1.nomJoueur);
+	 sensJoueur1 = NORD;
+	 firstIsFirst = false;
+	}
+	if ((requetePartie2.piece == SUD && reponsePartie2.validSensTete == OK) || (requetePartie2.piece == NORD && reponsePartie2.validSensTete == KO)){
+	 printf("joueur %s  -sens : SUD \n",requetePartie2.nomJoueur);
+	 sensJoueur2 = SUD;
+	 firstIsSecond = true;
+	}
+
+	if ((requetePartie2.piece == NORD && reponsePartie2.validSensTete == OK) || (requetePartie2.piece == SUD && reponsePartie2.validSensTete == KO)){
+	 printf("joueur %s  -sens : NORD \n",requetePartie2.nomJoueur);
+	 sensJoueur2 = NORD;
+	 firstIsSecond = true;	
+	}
+
+
+	//initialisation de la partie
+	initialiserPartie();
+
+
+	while(true){
+		//Reception du coup du premier joueur (qui a le sens SUD)
+		if (firstIsFirst)
+		{
+			err = recv(joueur1, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+			if (err <= 0) {
+				perror("(clientTCP) erreur dans la reception");
+				shutdown(joueur1, SHUT_RDWR); close(joueur1);
+			return -4;
+			}
+			//validation du coup
+			if (requeteCoupJoueur1.idRequest == COUP)
+			{
+				
+			}
+
+		}
+		
+
+
+
+	}
 
 
 
