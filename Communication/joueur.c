@@ -28,13 +28,12 @@ int main(int argc, char **argv){
 	TCoupReq coupReq;
 	TCoupReq coupReqAdversaire;
 	char sensDemande;
+	char colonneProv,colonneProvArr,ligneProv,ligneProvArr,pieceProv;
 	TSensTetePiece sensAccorde;
 	TSensTetePiece sens;
-	bool sensValide = false;
-	bool finished = false;
-	TCodeRep codeRepCoup;
-	int boucle = 0;	
-	TLg coup[6]= {UN,DEUX,TROIS,QUATRE,CINQ,SIX};
+	TCoupRep coupRep,coupRepAdv;
+		
+	
 	
 	
 	 
@@ -58,21 +57,21 @@ int main(int argc, char **argv){
 	partieReq.idReq = PARTIE;
     printf("Veuillez indiquer le nom du joueur : \n");
     fgets(partieReq.nomJoueur,T_NOM,stdin);
-
     printf("Veuillez indiquer le sens souhaité : \n");
     scanf("%c", &sensDemande);
+    
     
     if (sensDemande == 's')
     {
     	partieReq.piece = SUD;
-    	printf("Sens souhaité sud : \n");
+    	printf("Sens souhaité: SUD \n");
     	sens = SUD;
     	
     }
     if (sensDemande == 'n')
     {
     	partieReq.piece = NORD;
-    	printf("Sens souhaité nord : \n");
+    	printf("Sens souhaité: NORD\n");
     	sens = NORD;
     }
     
@@ -113,14 +112,15 @@ int main(int argc, char **argv){
 
 	if (partieRep.validSensTete == OK)
 	{
+		
 		if (sens == NORD)
 		{
 			sensAccorde = NORD;
-			printf("le sens accordé est : nord\n");
+			printf("Sens accordé: NORD (correspend au sens demandé)\n");
 		}
 		else{
 			sensAccorde = SUD;
-			printf("le sens accordé est : sud\n");
+			printf("Sens accordé: SUD (correspend au sens demandé)\n");
 		}
 		
 	}
@@ -128,46 +128,164 @@ int main(int argc, char **argv){
 		if (sens == NORD)
 		{
 			sensAccorde = SUD;
-			printf("le sens accordé est : nord\n");
+			printf("Sens accordé: SUD (l'inverse du sens demandé)\n");
 		}
 		else{
 			sensAccorde = NORD;
-			printf("le sens accordé est : sud\n");
+			printf("Sens accordé: NORD (l'inverse du sens demandé)\n");
 		}
 		
 	}
-
-	//Le sens voulu est accorde ou pas
-
-	if (sensAccorde == sens)
-	{
-		sensValide = true;
-		printf("le sens accordé correspend au sens demandé\n");
-
-	}
-	else{
-		printf("le sens accordé est le sens inverse\n");
-	}
+	//*****************************
+	//******* Partie **************
+	//***************************** 
 
 	switch (sensAccorde){
 		//on commence en premier
-		printf("on est le joueur sud on joue en premier\n");
+		
 		case SUD:
+			while(getchar() != '\n');
+			printf("C'est à vous de commencer \n");
 			//////**************************************
-			while(boucle < 4){
+			while(true){
 				//Construction d'une requete provisoire :
+				//*********************************************
+				printf("Choisir la piece : \n");
+    			scanf("%c", &pieceProv);
+
+    			printf("piece choisie :%c\n", pieceProv);
+    			while(getchar() != '\n');
+    			switch (pieceProv){
+    				case 'k':
+    					coupReq.piece.typePiece = KODAMA;
+    				break;
+    				case 'r':
+    					coupReq.piece.typePiece = KODAMA_SAMOURAI;
+    				break;
+    				case 'i':
+    					coupReq.piece.typePiece = KIRIN;
+    				break;
+    				case 'p':
+    					coupReq.piece.typePiece = KOROPOKKURU;
+    				break;
+    				case 'o':
+    					coupReq.piece.typePiece = ONI;
+    				break;
+    				case 's':
+    					coupReq.piece.typePiece = SUPER_ONI;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la colonne de depart (A,B,C,D,E) : \n");
+    			scanf("%c", &colonneProv);
+    			while(getchar() != '\n');
+    			switch (colonneProv){
+    				case 'a':
+    					coupReq.params.deplPiece.caseDep.c = A;
+    				break;
+    				case 'b':
+    					coupReq.params.deplPiece.caseDep.c = B;
+    				break;
+    				case 'c':
+    					coupReq.params.deplPiece.caseDep.c = C;
+    				break;
+    				case 'd':
+    					coupReq.params.deplPiece.caseDep.c = D;
+    				break;
+    				case 'e':
+    					coupReq.params.deplPiece.caseDep.c = E;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la ligne de depart (UN,DEUX....) : \n");
+    			scanf("%c", &ligneProv);
+    			while(getchar() != '\n');
+    			switch (ligneProv){
+    				case '1':
+    					coupReq.params.deplPiece.caseDep.l = UN;
+    				break;
+    				case '2':
+    					coupReq.params.deplPiece.caseDep.l = DEUX;
+    				break;
+    				case '3':
+    					coupReq.params.deplPiece.caseDep.l = TROIS;
+    				break;
+    				case '4':
+    					coupReq.params.deplPiece.caseDep.l = QUATRE;
+    				break;
+    				case '5':
+    					coupReq.params.deplPiece.caseDep.l = CINQ;
+    				break;
+    				case '6':
+    					coupReq.params.deplPiece.caseDep.l = SIX;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la colonne d'arrivée (A,B,C,D,E) : \n");
+    			scanf("%c", &colonneProvArr);
+    			while(getchar() != '\n');
+    			switch (colonneProvArr){
+    				case 'a':
+    					coupReq.params.deplPiece.caseArr.c = A;
+    				break;
+    				case 'b':
+    					coupReq.params.deplPiece.caseArr.c = B;
+    				break;
+    				case 'c':
+    					coupReq.params.deplPiece.caseArr.c = C;
+    				break;
+    				case 'd':
+    					coupReq.params.deplPiece.caseArr.c = D;
+    				break;
+    				case 'e':
+    					coupReq.params.deplPiece.caseArr.c = E;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la ligne d'arrivée (UN,DEUX....) : \n");
+    			scanf("%c", &ligneProvArr);
+    			while(getchar() != '\n');
+    			switch (ligneProvArr){
+    				case '1':
+    					coupReq.params.deplPiece.caseArr.l = UN;
+    				break;
+    				case '2':
+    					coupReq.params.deplPiece.caseArr.l = DEUX;
+    				break;
+    				case '3':
+    					coupReq.params.deplPiece.caseArr.l = TROIS;
+    				break;
+    				case '4':
+    					coupReq.params.deplPiece.caseArr.l = QUATRE;
+    				break;
+    				case '5':
+    					coupReq.params.deplPiece.caseArr.l = CINQ;
+    				break;
+    				case '6':
+    					coupReq.params.deplPiece.caseArr.l = SIX;
+    				break;
+
+
+    			}
+    			
+
+
 				coupReq.idRequest = COUP;
 				coupReq.numPartie = 1;
 				coupReq.typeCoup = DEPLACER;
-				coupReq.piece.typePiece = ONI;
 				coupReq.piece.sensTetePiece = SUD;
-				coupReq.params.deplPiece.caseDep.c = E;
-				coupReq.params.deplPiece.caseDep.l = coup[boucle];
-				coupReq.params.deplPiece.caseArr.c = E;
-				coupReq.params.deplPiece.caseArr.l = coup[boucle+1];
 				coupReq.params.deplPiece.estCapt = false;
 
 				
+				//*******************************************************************
 
 				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
     			if (err <= 0){
@@ -178,43 +296,45 @@ int main(int argc, char **argv){
 
     			//Reception de la reponse validation coup joué
 
-				err = recv(sock, &codeRepCoup, sizeof(TCodeRep), MSG_PEEK);
+				err = recv(sock, &coupRep, sizeof(TCoupRep), 0);
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception de la validation coup");
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
 
-				if (codeRepCoup == ERR_OK)
+				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
 				{
-					printf("1 valide !\n");
+					printf("Coup valide !\n");
 				}
 				else{
-					printf("1 non valide !\n");
+					printf("Coup non valide partie finie !\n");
+					break;
 				}
 
 				//Reception de la reponse validation coup joué par adversaire
 				printf("attente coup adversaire avant le recv!\n");
 
-				err = recv(sock, &codeRepCoup, sizeof(TCodeRep), 0);
+				err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
 				if (err <= 0) {
 					perror("(clientTCP) erreur dans la reception");
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
 
-				if (codeRepCoup == ERR_OK)
+				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
 				{
-					printf("2 coup adversaire valide  !\n");
+					printf("Coup valide !\n");
 				}
 				else{
-					printf("2 coup adversaire non valide !\n");
+					printf("Coup non valide partie finie !\n");
+					break;
 				}
 
 
 				//Reception du coup de l'adversaire
 
-				//Reception de la reponse validation coup joué par adversaire
+				//Reception de la reponse coup joué par adversaire
 
 				err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
 				if (err <= 0) {
@@ -222,50 +342,44 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
-				else{
-					printf("3 recv valide  !\n");
-				}
-
-
 				
-
 				
-
-
-
-				boucle++;
 			}
 
 		break;
 
 		case NORD:
-			printf("on est le joueur nord on joue en deuxieme \n");
+			printf("Vous jouez en deuxième\n");
 			//////**************************************
-			while(boucle<3){
+			while(true){
 				//Reception de la reponse validation coup (adversaire)
 				
 				
 				//Reception de la reponse validation coup joué par adversaire
 
-				err = recv(sock, &codeRepCoup, sizeof(TCodeRep), 0);
+				//Reception de la reponse validation coup joué par adversaire
+				
+
+				err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
 				if (err <= 0) {
 					perror("(clientTCP) erreur dans la reception");
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
 
-				if (codeRepCoup == ERR_OK)
+				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
 				{
-					printf("1 coup adversaire valide  !\n");
+					printf("Coup adversaire valide !\n");
 				}
 				else{
-					printf("1 coup adversaire non valide !\n");
+					printf("Coup adversaire non valide partie finie !\n");
+					break;
 				}
 
 
 				//Reception du coup de l'adversaire
 
-				//Reception de la reponse validation coup joué par adversaire
+				//Reception de la reponse coup joué par adversaire
 
 				err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
 				if (err <= 0) {
@@ -273,22 +387,144 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
-				else{
-					printf("2 coup adversaire valide  !\n");
-				}
+
+
+				//Construction d'une requete provisoire :
+				//*********************************************
+				while(getchar() != '\n');
+				printf("Choisir la piece : \n");
+    			scanf("%c", &pieceProv);
+    			while(getchar() != '\n');
+    			switch (pieceProv){
+    				case 'k':
+    					coupReq.piece.typePiece = KODAMA;
+    				break;
+    				case 'u':
+    					coupReq.piece.typePiece = KODAMA_SAMOURAI;
+    				break;
+    				case 'i':
+    					coupReq.piece.typePiece = KIRIN;
+    				break;
+    				case 'p':
+    					coupReq.piece.typePiece = KOROPOKKURU;
+    				break;
+    				case 'o':
+    					coupReq.piece.typePiece = ONI;
+    				break;
+    				case 's':
+    					coupReq.piece.typePiece = SUPER_ONI;
+    				break;
+
+
+    			}
+    			
+    			
+    			printf("Choisir la colonne de depart (A,B,C,D,E) : \n");
+    			scanf("%c", &colonneProv);
+    			while(getchar() != '\n');
+    			switch (colonneProv){
+    				case 'a':
+    					coupReq.params.deplPiece.caseDep.c = A;
+    				break;
+    				case 'b':
+    					coupReq.params.deplPiece.caseDep.c = B;
+    				break;
+    				case 'c':
+    					coupReq.params.deplPiece.caseDep.c = C;
+    				break;
+    				case 'd':
+    					coupReq.params.deplPiece.caseDep.c = D;
+    				break;
+    				case 'e':
+    					coupReq.params.deplPiece.caseDep.c = E;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la ligne de depart (UN,DEUX....) : \n");
+    			scanf("%c", &ligneProv);
+    			while(getchar() != '\n');
+    			switch (ligneProv){
+    				case '1':
+    					coupReq.params.deplPiece.caseDep.l = UN;
+    				break;
+    				case '2':
+    					coupReq.params.deplPiece.caseDep.l = DEUX;
+    				break;
+    				case '3':
+    					coupReq.params.deplPiece.caseDep.l = TROIS;
+    				break;
+    				case '4':
+    					coupReq.params.deplPiece.caseDep.l = QUATRE;
+    				break;
+    				case '5':
+    					coupReq.params.deplPiece.caseDep.l = CINQ;
+    				break;
+    				case '6':
+    					coupReq.params.deplPiece.caseDep.l = SIX;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la colonne d'arrivée (A,B,C,D,E) : \n");
+    			scanf("%c", &colonneProvArr);
+    			while(getchar() != '\n');
+    			switch (colonneProvArr){
+    				case 'a':
+    					coupReq.params.deplPiece.caseArr.c = A;
+    				break;
+    				case 'b':
+    					coupReq.params.deplPiece.caseArr.c = B;
+    				break;
+    				case 'c':
+    					coupReq.params.deplPiece.caseArr.c = C;
+    				break;
+    				case 'd':
+    					coupReq.params.deplPiece.caseArr.c = D;
+    				break;
+    				case 'e':
+    					coupReq.params.deplPiece.caseArr.c = E;
+    				break;
+
+
+    			}
+    			
+    			printf("Choisir la ligne d'arrivée (UN,DEUX....) : \n");
+    			scanf("%c", &ligneProvArr);
+    			while(getchar() != '\n');
+    			switch (ligneProvArr){
+    				case '1':
+    					coupReq.params.deplPiece.caseArr.l = UN;
+    				break;
+    				case '2':
+    					coupReq.params.deplPiece.caseArr.l = DEUX;
+    				break;
+    				case '3':
+    					coupReq.params.deplPiece.caseArr.l = TROIS;
+    				break;
+    				case '4':
+    					coupReq.params.deplPiece.caseArr.l = QUATRE;
+    				break;
+    				case '5':
+    					coupReq.params.deplPiece.caseArr.l = CINQ;
+    				break;
+    				case '6':
+    					coupReq.params.deplPiece.caseArr.l = SIX;
+    				break;
+
+
+    			}
+    			
+
 
 
 				coupReq.idRequest = COUP;
 				coupReq.numPartie = 1;
 				coupReq.typeCoup = DEPLACER;
-				coupReq.piece.typePiece = ONI;
-				coupReq.piece.sensTetePiece = NORD ;
-				coupReq.params.deplPiece.caseDep.c = A;
-				coupReq.params.deplPiece.caseDep.l = coup[5-boucle];
-				coupReq.params.deplPiece.caseArr.c = A;
-				coupReq.params.deplPiece.caseArr.l = coup[5-(boucle+1)];
+				coupReq.piece.sensTetePiece = NORD;
 				coupReq.params.deplPiece.estCapt = false;
-
 
 				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
     			if (err <= 0){
@@ -299,26 +535,21 @@ int main(int argc, char **argv){
 
     			//Reception de la reponse validation coup joué
 
-				err = recv(sock, &codeRepCoup, sizeof(TCodeRep), MSG_PEEK);
+				err = recv(sock, &coupRep, sizeof(TCoupRep), 0);
 				if (err <= 0) {
-					perror("(clientTCP) erreur dans la reception");
+					perror("(joueur) erreur dans la reception de la validation coup");
 					shutdown(sock, SHUT_RDWR); close(sock);
 					return -4;
 				}
 
-				if (codeRepCoup == ERR_OK)
+				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
 				{
-					printf("3 coup valide mabrouk !\n");
+					printf("Coup valide !\n");
 				}
 				else{
-					printf("3 coup non valide !\n");
+					printf("Coup non valide partie finie !\n");
+					break;
 				}
-
-
-    			
-
-
-				boucle++;
 			}
 
 		break;
@@ -329,18 +560,7 @@ int main(int argc, char **argv){
 
 	//Fermeture de la socket joueur
 	shutdown(sock, SHUT_RDWR);
-	close(sock);
-
-
-
-    
-
-
-
-    
-    
-    
-  
+	close(sock); 
 
   return 0;
 }
