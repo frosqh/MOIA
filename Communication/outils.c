@@ -13,7 +13,7 @@
 #include "protocolYokai.h"
 
 
-TCoupReq construireCoup(int socket,TSensTetePiece sens){
+TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 	int err;
 	TCoupReq coupReq;
 	Coup coupJava;
@@ -35,7 +35,7 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens){
 		exit(-11);
 	}
 	coupReq.idRequest = COUP;
-	coupReq.numPartie = 1;
+	coupReq.numPartie = partie;
 	coupReq.typeCoup = DEPLACER;
 	coupReq.piece.sensTetePiece = sens;
 	coupReq.piece.typePiece = ntohl(coupJava.piece);
@@ -47,48 +47,4 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens){
 
 	printf("construction coup finie \n");
 	return coupReq;
-}
-
-
-
-TCoupRep validerAdvers(int sock,TCoupReq coupReqAdversaire){
-
-	//Reception de la reponse validation coup joué par adversaire
-	TCoupRep coupRepAdv;
-	int err;
-
-	err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
-	if (err <= 0) {
-		perror("(joueur) erreur dans la reception du coup adversaire");
-		shutdown(sock, SHUT_RDWR); close(sock);
-		exit(-11);
-	}
-
-	if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
-	{
-		printf("Coup valide !\n");
-	}
-	else{
-		if (coupRepAdv.err == ERR_COUP)
-		{
-			printf("coup erroné \n");
-		}
-		if (coupRepAdv.validCoup == TRICHE)
-		{
-			printf("coup triché \n");
-		}
-		if (coupRepAdv.validCoup != CONT)
-		{
-			printf("perdu \n");
-		}
-	}
-
-	err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
-	if (err <= 0) {
-		perror("(joueur) erreur dans la reception du coup adversaire");
-		shutdown(sock, SHUT_RDWR); close(sock);
-		exit(-11);
-	}
-    return coupRepAdv;
-
 }

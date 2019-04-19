@@ -142,9 +142,9 @@ int main(int argc, char **argv){
 		}
 		
 	}
-	//*****************************
-	//******* Partie **************
-	//***************************** 
+	printf("******************************* \n");
+	printf("************ Partie 1 ********* \n");
+	printf("******************************* \n");
 
 	switch (sensAccorde){
 		//on commence en premier
@@ -157,12 +157,12 @@ int main(int argc, char **argv){
 			
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
-			    coupReq = construireCoup(sockJava,SUD);
+			    coupReq = construireCoup(sockJava,SUD,1);
 			    err = send(sock, &coupReq, sizeof(TCoupReq), 0);
 				if (err <= 0){
 						perror("(joueur) erreur sur le send coup");
 						shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-14);
+					break;
 				}
     			printf("Coup construit et envoyé \n");
 			    //envoi du coup et reception de la reponse
@@ -170,7 +170,7 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception de la validation coup");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-13);
+					break;
 				}
 
 				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
@@ -179,7 +179,7 @@ int main(int argc, char **argv){
 				}
 				else{
 					printf("Coup non valide partie finie !\n");
-					exit(-12);
+					break;
 				}
 				printf("Coup joué \n");
 				//Reception de la reponse validation coup joué par adversaire
@@ -189,7 +189,7 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception du coup adversaire");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-11);
+					break;
 				}
 
 				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
@@ -215,7 +215,7 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception du coup adversaire");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-11);
+					break;
 				}
 				
 				
@@ -234,7 +234,117 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception du coup adversaire");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-11);
+					break;
+				}
+
+				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
+				{
+					printf("Coup valide !\n");
+				}
+				else{
+					if (coupRepAdv.err == ERR_COUP)
+					{
+						printf("coup erroné \n");
+					}
+					if (coupRepAdv.validCoup == TRICHE)
+					{
+						printf("coup triché \n");
+
+					}
+					if (coupRepAdv.propCoup != CONT)
+					{
+						printf("perdu \n");
+					}
+					break;
+
+				}
+
+				err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception du coup adversaire");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+				//Construction d'un coup
+				printf("Construction du coup en cours \n");
+				coupReq = construireCoup(sockJava,NORD,1);
+				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+				printf("Coup construit et envoyé\n");
+    			//envoi du coup et reception de la reponse
+				err = recv(sock, &coupRep, sizeof(TCoupRep), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception de la validation coup");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+
+				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
+				{
+					printf("Coup valide !\n");
+				}
+				else{
+					printf("Coup non valide partie finie !\n");
+					break;
+				}
+				printf("Coup joué \n"); 			
+			}
+		break;
+	}
+
+	printf("******************************* \n");
+	printf("************ Partie 2 ********* \n");
+	printf("******************************* \n");
+	printf("\n");
+
+	switch (sensAccorde){
+		//on commence en premier
+		
+		case NORD:
+			printf("******************************* \n");
+			printf("** C'est à vous de commencer ** \n");
+			printf("******************************* \n");
+			while(true){
+			
+				//Construction d'un coup (Java)
+				printf("Construction du coup en cours \n");
+			    coupReq = construireCoup(sockJava,NORD,2);
+			    err = send(sock, &coupReq, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+    			printf("Coup construit et envoyé \n");
+			    //envoi du coup et reception de la reponse
+				err = recv(sock, &coupRep, sizeof(TCoupRep), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception de la validation coup");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+
+				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
+				{
+					printf("Coup valide !\n");
+				}
+				else{
+					printf("Coup non valide partie finie !\n");
+					break;
+				}
+				printf("Coup joué \n");
+				//Reception de la reponse validation coup joué par adversaire
+				printf("Attente coup adversaire...\n");
+
+				err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception du coup adversaire");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
 				}
 
 				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
@@ -260,16 +370,61 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception du coup adversaire");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-11);
+					break;
+				}
+				
+				
+			}
+
+		break;
+
+		case SUD:
+			printf("******************************* \n");
+			printf("*** Vous jouez en deuxième **** \n");
+			printf("******************************* \n");
+			//////**************************************
+			while(true){
+				printf("Attente coup adversaire...\n");
+				err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception du coup adversaire");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
+				}
+
+				if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT)
+				{
+					printf("Coup valide !\n");
+				}
+				else{
+					if (coupRepAdv.err == ERR_COUP)
+					{
+						printf("coup erroné \n");
+					}
+					if (coupRepAdv.validCoup == TRICHE)
+					{
+						printf("coup triché \n");
+					}
+					if (coupRepAdv.propCoup != CONT)
+					{
+						printf("perdu \n");
+					}
+				}
+
+				err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(joueur) erreur dans la reception du coup adversaire");
+					shutdown(sock, SHUT_RDWR); close(sock);
+					break;
 				}
 				//Construction d'un coup
 				printf("Construction du coup en cours \n");
-				coupReq = construireCoup(sockJava,NORD);
+				coupReq = construireCoup(sockJava,SUD,2);
 				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
 				if (err <= 0){
 						perror("(joueur) erreur sur le send coup");
 						shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-14);
+					break;
 				}
 				printf("Coup construit et envoyé\n");
     			//envoi du coup et reception de la reponse
@@ -277,7 +432,7 @@ int main(int argc, char **argv){
 				if (err <= 0) {
 					perror("(joueur) erreur dans la reception de la validation coup");
 					shutdown(sock, SHUT_RDWR); close(sock);
-					exit(-13);
+					break;
 				}
 
 				if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT)
@@ -286,7 +441,7 @@ int main(int argc, char **argv){
 				}
 				else{
 					printf("Coup non valide partie finie !\n");
-					exit(-12);
+					break;
 				}
 				printf("Coup joué \n"); 			
 			}
