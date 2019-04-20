@@ -48,3 +48,95 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 	printf("construction coup finie \n");
 	return coupReq;
 }
+
+TSensTetePiece debutPartie(int sock, TPartieReq partieReq, TPartieRep partieRep){
+
+	TSensTetePiece sens, sensAccorde;
+	char sensDemande;
+	int err;
+
+	partieReq.idReq = PARTIE;
+    printf("Veuillez indiquer le nom du joueur : \n");
+    fgets(partieReq.nomJoueur,T_NOM,stdin);
+    printf("Veuillez indiquer le sens souhaité : \n");
+    scanf("%c", &sensDemande);
+    
+    
+    if (sensDemande == 's')
+    {
+    	partieReq.piece = SUD;
+    	printf("Sens souhaité: SUD \n");
+    	sens = SUD;
+    	
+    }
+    if (sensDemande == 'n')
+    {
+    	partieReq.piece = NORD;
+    	printf("Sens souhaité: NORD\n");
+    	sens = NORD;
+    }
+    
+    
+    err = send(sock, &partieReq, sizeof(TPartieReq), 0);
+    if (err <= 0){
+       perror("(client) erreur sur le send de requete de demander de partie");
+       shutdown(sock, SHUT_RDWR); close(sock);
+       return -3;
+    }
+    
+    //Reception de la reponse Partie
+
+	err = recv(sock, &partieRep, sizeof(TPartieRep), 0);
+	if (err <= 0) {
+		perror("(joueur) erreur dans la reception de validation de demande de partie.");
+		shutdown(sock, SHUT_RDWR); close(sock);
+		return -4;
+	}
+
+	//Le code de la reponse recue
+	switch(partieRep.err){
+		case ERR_OK :
+			printf("Validation de la requete de demande de partie.\n");
+
+		break;
+		case ERR_PARTIE :
+			printf("Erreur sur la  requete de demande de partie.\n");
+			return -5;
+		break;
+		default :
+			printf("Erreur sur la requete de demande de partie (mauvaise saisie).\n");
+			return -6;
+		break;
+	}
+
+	//Extraire les informations de la reponse recue
+
+	if (partieRep.validSensTete == OK)
+	{
+		
+		if (sens == NORD)
+		{
+			sensAccorde = NORD;
+			printf("Sens accordé: NORD (correspend au sens demandé).\n");
+		}
+		else{
+			sensAccorde = SUD;
+			printf("Sens accordé: SUD (correspend au sens demandé).\n");
+		}
+		
+	}
+	if (partieRep.validSensTete == KO){
+		if (sens == NORD)
+		{
+			sensAccorde = SUD;
+			printf("Sens accordé: SUD (l'inverse du sens demandé)\n");
+		}
+		else{
+			sensAccorde = NORD;
+			printf("Sens accordé: NORD (l'inverse du sens demandé)\n");
+		}
+		
+	}
+
+	return sensAccorde;
+}

@@ -39,22 +39,32 @@ public class Engine {
 					//construction d'un coup manuellement
 					System.out.println("Choisir la piece à deplacer : ");
 					int piece = scan.nextInt();
-					dos.writeInt(piece);
+					//dos.writeInt(piece);
 					System.out.println("Choisir la colonne de depart (A,B,...E) : ");
 					int colonneDep = scan.nextInt();
-					dos.writeInt(colonneDep);
+					//dos.writeInt(colonneDep);
 					System.out.println("Choisir la ligne de depart (UN,DEUX,...SIX) : ");
 					int ligneDep = scan.nextInt();
-					dos.writeInt(ligneDep);
+					//dos.writeInt(ligneDep);
 					System.out.println("Choisir la colonne d'arrivée (A,B,...E) : ");
 					int colonneArr = scan.nextInt();
-					dos.writeInt(colonneArr);
+					//dos.writeInt(colonneArr);
 					System.out.println("Choisir la ligne d'arrivée (UN,DEUX,...SIX) : ");
 					int ligneArr = scan.nextInt();
-					dos.writeInt(ligneArr);
+					//dos.writeInt(ligneArr);
 					System.out.println("Capture ? 1 : 0 ");
 					int capture = scan.nextInt();
-					dos.writeInt(capture);
+					//dos.writeInt(capture);
+
+					//Utile pour apres
+					Coup coup = new Coup(piece,colonneDep,ligneDep,colonneArr,ligneArr,capture);
+
+					dos.writeInt(coup.getPiece());
+					dos.writeInt(coup.getCDep());
+					dos.writeInt(coup.getLDep());
+					dos.writeInt(coup.getCArr());
+					dos.writeInt(coup.getLArr());
+					dos.writeInt(coup.getCapture());
 				}
 
 				// 

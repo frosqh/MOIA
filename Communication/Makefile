@@ -27,4 +27,4 @@ serveur: serveur.c fonctionsTCP.o
 
 clean:
 	rm *~ ; rm -i \#* ; rm *.o; \
-        rm joueur ; 
+        rm joueur ;rm serveur ; 
