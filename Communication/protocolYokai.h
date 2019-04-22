@@ -113,11 +113,15 @@ typedef struct {
   TPropCoup propCoup;       /* Propriete du coup */
 } TCoupRep;
 
-///ajouté provisoirement
+//provisoire 
 
 typedef struct
 {
-  int piece;
+  int idReq;
+  int numPartie;
+  int typeCoup;
+  int sensPiece;
+  int typePiece;
   int colonneDep;
   int ligneDep;
   int colonneArr;

@@ -1,36 +1,83 @@
+
+
+
+
+
+
+
+
+
 public class Coup{
-	int piece,colonneDep,colonneArr,ligneDep,ligneArr,capture;
 
-	public Coup(int p,int cd,int ld,int ca,int la,int c){
-		piece = p;
-		colonneDep = cd;
-		ligneDep = ld;
-		colonneArr = ca;
-		ligneArr = la;
-		capture = c;
-	}
+    IdRequest idRequete;
+    int numPartie;
+    TCoup typeCoup;
+    Piece piece;
+    Deplacement deplacement;
+    Depos depos;
 
-	public int getPiece(){
-		return piece;
-	}
 
-	public int getCDep(){
-		return colonneDep;
-	}
+    public Coup(IdRequest idReq, int numP, TCoup typeC, Piece p, Deplacement d){
+        idRequete = idReq;
+        numPartie = numP;
+        typeCoup = typeC;
+        piece = p;
+        deplacement = d;
+    }
 
-	public int getLDep(){
-		return ligneDep;
-	}
+    public Coup(IdRequest idReq, int numP, TCoup typeC, Piece p, Depos d){
+        idRequete = idReq;
+        numPartie = numP;
+        typeCoup = typeC;
+        piece = p;
+        depos = d;
+    }
 
-	public int getCArr(){
-		return colonneArr;
-	}
+    public IdRequest getIdRequete() {
+        return idRequete;
+    }
 
-	public int getLArr(){
-		return ligneArr;
-	}
-	public int getCapture(){
-		return capture;
-	}
+    public int getNumPartie() {
+        return numPartie;
+    }
 
+    public Piece getPiece() {
+        return piece;
+    }
+
+    public TCoup getTypeCoup() {
+        return typeCoup;
+    }
+
+    public Depos getDepos() {
+        return depos;
+    }
+
+    public Deplacement getDeplacement() {
+        return deplacement;
+    }
+
+    public void setDeplacement(Deplacement deplacement) {
+        this.deplacement = deplacement;
+    }
+
+    public void setDepos(Depos depos) {
+        this.depos = depos;
+    }
+
+    public void setIdRequete(IdRequest idRequete) {
+        this.idRequete = idRequete;
+    }
+
+    public void setNumPartie(int numPartie) {
+        this.numPartie = numPartie;
+    }
+
+    public void setPiece(Piece piece) {
+        this.piece = piece;
+    }
+
+    public void setTypeCoup(TCoup typeCoup) {
+        this.typeCoup = typeCoup;
+    }
 }

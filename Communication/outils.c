@@ -34,16 +34,17 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 		shutdown(socket, SHUT_RDWR); close(socket);
 		exit(-11);
 	}
-	coupReq.idRequest = COUP;
-	coupReq.numPartie = partie;
-	coupReq.typeCoup = DEPLACER;
-	coupReq.piece.sensTetePiece = sens;
-	coupReq.piece.typePiece = ntohl(coupJava.piece);
+	coupReq.idRequest = ntohl(coupJava.idReq);
+	coupReq.numPartie = ntohl(coupJava.numPartie);
+	coupReq.typeCoup = ntohl(coupJava.typeCoup);
+	coupReq.piece.sensTetePiece = ntohl(coupJava.sensPiece);
+	coupReq.piece.typePiece = ntohl(coupJava.typePiece);
 	coupReq.params.deplPiece.caseDep.c = ntohl(coupJava.colonneDep);
 	coupReq.params.deplPiece.caseDep.l = ntohl(coupJava.ligneDep);
 	coupReq.params.deplPiece.caseArr.c = ntohl(coupJava.colonneArr);
 	coupReq.params.deplPiece.caseArr.l = ntohl(coupJava.ligneArr);
-	coupReq.params.deplPiece.estCapt = ntohl(coupJava.capture);
+	if(ntohl(coupJava.capture)==0) coupReq.params.deplPiece.estCapt = false;
+	else coupReq.params.deplPiece.estCapt = true;
 
 	printf("construction coup finie \n");
 	return coupReq;

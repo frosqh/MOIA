@@ -35,36 +35,71 @@ public class Engine {
 				while(true){
 					OutputStream os = s.getOutputStream();
 					DataOutputStream dos= new DataOutputStream(os);
+					
 					Scanner scan = new Scanner(System.in);
 					//construction d'un coup manuellement
-					System.out.println("Choisir la piece à deplacer : ");
-					int piece = scan.nextInt();
-					//dos.writeInt(piece);
-					System.out.println("Choisir la colonne de depart (A,B,...E) : ");
-					int colonneDep = scan.nextInt();
-					//dos.writeInt(colonneDep);
+					System.out.println("Choisir le numero de la partie (1 ou 2) : ");
+					int numPartie = scan.nextInt();
+
+					//TCoup typeCoup = scan.nextInt();
+					System.out.println("Choisir le type du coup (0 pour DEPLACER) : ");
+					int netTcoup = scan.nextInt();
+					
+					
+					//TSensTetePiece sensPiece ;
+					System.out.println("Choisir le sens de la piece à deplacer (0 = NORD ou 1 = SUD) : ");
+					int netSPiece = scan.nextInt();
+					
+					//TTYpePiece typePiece;
+					
+					System.out.println("Choisir le type de la piece à deplacer : ");
+					int netTPiece = scan.nextInt();
+					
+					//Piece piece = new Piece(sensPiece,typePiece);
+
+					
+					//TCol colonneDep;
+					System.out.println("Choisir la colonne de depart (A,B) : ");
+					int netCDep = scan.nextInt();
+					
+					
+					int ligneDep;
 					System.out.println("Choisir la ligne de depart (UN,DEUX,...SIX) : ");
-					int ligneDep = scan.nextInt();
+					int netLDep = scan.nextInt();
+					
+					
+
+					//Case caseDepart = new Case(colonneDep,ligneDep);
 					//dos.writeInt(ligneDep);
-					System.out.println("Choisir la colonne d'arrivée (A,B,...E) : ");
-					int colonneArr = scan.nextInt();
-					//dos.writeInt(colonneArr);
-					System.out.println("Choisir la ligne d'arrivée (UN,DEUX,...SIX) : ");
-					int ligneArr = scan.nextInt();
+					//TCol colonneArr;
+					System.out.println("Choisir la colonne de depart (A,B) : ");
+					int netCArr = scan.nextInt();
+							
+					//TLg ligneArr;
+					System.out.println("Choisir la ligne de depart (UN,DEUX,...SIX) : ");
+					int netLArr = scan.nextInt();
+					
+					//Case caseArrivee = new Case(colonneArr,ligneArr);
 					//dos.writeInt(ligneArr);
 					System.out.println("Capture ? 1 : 0 ");
 					int capture = scan.nextInt();
 					//dos.writeInt(capture);
-
+					//Deplacement deplacement = new Deplacement(caseDepart,caseArrivee,capture);
 					//Utile pour apres
-					Coup coup = new Coup(piece,colonneDep,ligneDep,colonneArr,ligneArr,capture);
+					//Coup coup = new Coup(TCoup.COUP,numPartie,typeCoup,piece,deplacement);
 
-					dos.writeInt(coup.getPiece());
-					dos.writeInt(coup.getCDep());
-					dos.writeInt(coup.getLDep());
-					dos.writeInt(coup.getCArr());
-					dos.writeInt(coup.getLArr());
-					dos.writeInt(coup.getCapture());
+					dos.writeInt(1);
+					dos.writeInt(numPartie);
+					dos.writeInt(netTcoup);
+					dos.writeInt(netSPiece);
+					dos.writeInt(netTPiece);
+					dos.writeInt(netCDep);
+					dos.writeInt(netLDep);
+					dos.writeInt(netCArr);
+					dos.writeInt(netLArr);
+					dos.writeInt(capture);
+					
+
 				}
 
 				// 
