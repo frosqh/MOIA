@@ -1,0 +1,9 @@
+Un élément de jeu de la forme [tour, piecesRouge, piecesBleue] où
+
+	tour est de type int
+	piecesRouge est de type [[x1,y1,numPiece1],[x2,y2,numPiece2],...]
+	piecesRouge est de type [[x1,y1,numPiece1],[x2,y2,numPiece2],...]
+
+On peut alors effecuer la vérification non seulement sur la condition de victoire mais aussi sur le nombre de tours (< 30).
+
+Si on trouve un noeud équivalent déjà existant, on ajoute un arc du parent vers le déjà existant, puis on incrémente le compteur de passage.
