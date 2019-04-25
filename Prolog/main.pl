@@ -1,5 +1,10 @@
 :-set_prolog_flag(toplevel_print_options,[max_depth(0)]).
+:-set_prolog_flag(double_quotes, chars).
 :-['./movePiece.pl'].
+:-['./board.pl'].
+:-['./util.pl'].
+:-['./MCTS.pl'].
+
 
 
 test(R) :-

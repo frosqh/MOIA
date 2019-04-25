@@ -1,5 +1,3 @@
-:-['./board.pl'].
-
 %:-moveForward/2
 %:-moveBackward/2
 %:-moveRight/2
@@ -199,8 +197,6 @@ attack([T,_],J,G,NG):-
 				%J = Identifiant du joueur
 				%G = Grille de jeu
 				%GR = Grille de jeu après mouvement [O]
-%TODO également le miam entre pièces
-%TODO Vérifier l'existence de la pièce dans la grille avant même de tester le move
 movePiece([A,N],J,G,GR):-
 	own([A,N],J,G),
 	move([A,N],J,T),

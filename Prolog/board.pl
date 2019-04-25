@@ -27,7 +27,7 @@ initialGrid(1,PG):-
 	].
 
 initialGrid(-1,PG):-
-piece(Kodama,kodama),
+	piece(Kodama,kodama),
 	piece(Oni,oni),
 	piece(Kirin,kirin),
 	piece(Koro,koropokkuru),
@@ -53,14 +53,14 @@ piece(Kodama,kodama),
 updateGrid([[P|G],IG],P,1,NP,[[NP|G],IG]).
 updateGrid([[P2|G],IG],P,1,NP,GR):-
 	P \= P2,
-	upgradeGrid([G,IG],P,1,NP,[G1,G2]),
+	updateGrid([G,IG],P,1,NP,[G1,G2]),
 	GR = [[P2|G1],G2].
 
 
 updateGrid([IG,[P|G]],P,-1,NP,[IG,[NP|G]]).
 updateGrid([IG,[P2|G]],P,-1,NP,GR):-
 	P \= P2,
-	upgradeGrid([IG,G],P,-1,NP,[G1,G2]),
+	updateGrid([IG,G],P,-1,NP,[G1,G2]),
 	GR = [G1,[P2|G2]].
 
 %:-removePieceFromGrid/4
