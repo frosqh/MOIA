@@ -205,3 +205,14 @@ movePiece([A,N],J,G,GR):-
 	upgrade([T,N],J,R),
 	attack(R,J,G,NG),
 	updateGrid(NG,[A,N],J,R,GR).
+
+availableMovePiece([A,N], J, G, T):-
+	own([A,N],J,G),
+	move([A,N],J,T),
+	validCoorGrid(T),
+	validSuper(T,J,G).
+
+actuallyMovePiece([A,N], J, G, T, GR):-
+	upgrade([T,N], J, R),
+	attack(R,J,G,NG),
+	updateGrid(NG,[A,N],J,R,GR).

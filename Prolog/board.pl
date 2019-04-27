@@ -80,3 +80,18 @@ removePieceFromGrid(T,-1,[IG,[[T2,P2]|G]],[IG,NG]):-
 	T \= T2,
 	removePieceFromGrid(T,-1,[IG,G],[IG,NNG]),
 	NG = [[T2,P2]|NNG].
+
+
+%:-hasWin/2
+%Vérifie si un joueur a gagné la partie (no si aucune victoire)
+%hasWin(G,J) : 
+				%G = Grille de jeu
+				%J = Joueur gagnant [O]
+hasWin([[],_],-1).
+hasWin([_,[]],1).
+hasWin([_,[[_,N]|G]], 1):-
+	\+ piece(N,koropokkuru),
+	hasWin([[1],G], 1).
+hasWin([[[_,N]|G],_], -1):-
+	\+ piece(N,koropokkuru),
+	hasWin([G,[1]], -1).
