@@ -1,0 +1,17 @@
+Init = 2*Oni + 2*Kirin + Koropokkuru + 3*Kodama
+
+Amélioration possible ! 
+
+
+On a simplement à prendre en compte l'intégralité des coups possible, puis d'appliquer un MiniMax là dessus, je ne vois pas pourquoi le prof nous en empêcherait. En étant bien motivé, il me semble que cela puisse tourner sur mon fixe sans trop trop de problèmes, mais à voir.
+
+En appliquant un alphabeta, cela me paraît même encore plus simple et garanti.
+
+En effet, une fois que l'on a preuve qu'un chemin amène à la défaite, on peut l'oublier, ou en tout cas changer nos coups.
+
+En vrai, je testerais bien un code du genre sous Java.
+
+Cela me paraît pas trop compliqué à mettre en place
+
+Allez, let's go !
+
