@@ -13,6 +13,10 @@
 #include "protocolYokai.h"
 #include "validation.h"
 
+/*Serveur version 26 avril (djeber)
+TODO : mettre les choses dans des fonctions
+Tester les cas possibles afin de détécter des erreurs eventuelles */
+
 int main(int argc, char **argv){
 	int  socketConnexion,        /* descripteur socket connexion */
        joueur1,
@@ -20,7 +24,8 @@ int main(int argc, char **argv){
        port = 0,            /* numero de port */
        sizeAddr,        /* taille de l'adresse d'une socket */
        err,	            /* code d'erreur */
-       boucle1 = 0;
+       boucle1 = 0,
+       select;
     struct sockaddr_in addClient;	/* adresse de la socket client connectee */   
     bool validation = true;    // utilisation de la validation
     bool timeout = true;       // utilisation de la limite deu temps
@@ -31,7 +36,14 @@ int main(int argc, char **argv){
     TPartieRep reponsePartie1,reponsePartie2;
     TSensTetePiece sensJoueur1,sensJoueur2;
     TCoupReq requeteCoupJoueur1,requeteCoupJoueur2;
-    fd_set  readSet; 
+    TCoupRep reponseCoupJoueur1,reponseCoupJoueur2;
+    TPropCoup propCoupJoueur1,propCoupJoueur2;
+
+    bool validationJoueur1=true, validationJoueur2=true, finPartie = false;
+    fd_set  readSet;
+    struct timeval tv;   // pour gérer le timeOut
+	
+ 
 
 
     //verification des arguments 
@@ -96,8 +108,17 @@ int main(int argc, char **argv){
 	FD_SET(joueur1,&readSet);
 	FD_SET(joueur2,&readSet);
 
+	//Mettre le timeOut en place sur les sockets des joueurs
+	/*
+	if(timeout){
+		tv.tv_sec = 6;
+		tv.tv_usec = 0;
+		setsockopt(joueur1, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+		setsockopt(joueur2, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
+	}*/
+
 	//Utilisation du multiplexage
-	err = select(FD_SETSIZE, &readSet, NULL, NULL, NULL);
+	select = select(FD_SETSIZE, &readSet, NULL, NULL, NULL);
     if (err < 0) {
       	perror("(serveurSelect) erreur dans select");
       	shutdown(socketConnexion, SHUT_RDWR); close(socketConnexion);
@@ -127,7 +148,7 @@ int main(int argc, char **argv){
 					reponsePartie1.validSensTete = KO;
 				}
 				else{
-					reponsePartie1.validSensTete == OK;
+					reponsePartie1.validSensTete = OK;
 				}
 			} 
 			strncpy(reponsePartie1.nomAdvers, "bidon2", T_NOM);
@@ -161,7 +182,7 @@ int main(int argc, char **argv){
 					reponsePartie2.validSensTete = KO;
 				}
 				else{
-					reponsePartie2.validSensTete == OK;
+					reponsePartie2.validSensTete = OK;
 				}
 			} 
 			strncpy(reponsePartie2.nomAdvers, "bidon1", T_NOM);
@@ -199,40 +220,510 @@ int main(int argc, char **argv){
 	if ((requetePartie2.piece == NORD && reponsePartie2.validSensTete == OK) || (requetePartie2.piece == SUD && reponsePartie2.validSensTete == KO)){
 	 printf("joueur %s  -sens : NORD \n",requetePartie2.nomJoueur);
 	 sensJoueur2 = NORD;
-	 firstIsSecond = true;	
+	 firstIsSecond = false;	
 	}
 
+	
+	
 
-	//initialisation de la partie
-	initialiserPartie();
+	//dans le cas ou celui qui demande le sens en premier est SUS
+	if (firstIsFirst)
+	{
+		//initialisation de la partie aller (1)
+		initialiserPartie();
+		printf("Début Partie Aller (Le joueur ayant sens SUD commence)\n");
 
-
-	while(true){
-		//Reception du coup du premier joueur (qui a le sens SUD)
-		if (firstIsFirst)
-		{
+		while(!finPartie){
+			//reinitialiser les descripteurs
+			FD_ZERO(&readSet);
+			FD_SET(joueur1,&readSet);
+			FD_SET(joueur2,&readSet);
+			//recevoir la requete coup du premier joueur (SUD)
 			err = recv(joueur1, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
 			if (err <= 0) {
 				perror("(clientTCP) erreur dans la reception");
 				shutdown(joueur1, SHUT_RDWR); close(joueur1);
 			return -4;
 			}
-			//validation du coup
-			if (requeteCoupJoueur1.idRequest == COUP)
+			//validation du coup du premier joueur (SUD)
+
+			validationJoueur1 = validationCoup(1, requeteCoupJoueur1, &propCoupJoueur1);
+			
+			reponseCoupJoueur1.propCoup = propCoupJoueur1;
+			if (validationJoueur1)
 			{
+				printf("recoitCoup : validation du coup du joueur SUD = VALID\n");
+				reponseCoupJoueur1.err = ERR_OK;
+				reponseCoupJoueur1.validCoup = VALID;
+			}
+			else{
+				printf("recoitCoup : validation du coup du joueur SUD = TRICHE\n");
+				reponseCoupJoueur1.err = ERR_OK;
+				reponseCoupJoueur1.validCoup = TRICHE;
+			}
+			//envoi de la validation au joueur 1 (SUD)
+			err = send(joueur1, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
 				
 			}
+
+			//envoi de la validation au joueur 2 (NORD)
+			err = send(joueur2, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				
+			}
+			//La partie aller se continue
+			if (validationJoueur1 && propCoupJoueur1==CONT)
+			{
+				//envoi du coup au joueur adverse (NORD)
+				err = send(joueur2, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					
+				}
+				//recevoir la requete coup du deuxième joueur (NORD)
+				err = recv(joueur2, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(clientTCP) erreur dans la reception");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				return -4;
+				}
+				//validation du coup du deuxième joueur (NORD)
+
+				validationJoueur2 = validationCoup(2, requeteCoupJoueur2, &propCoupJoueur2);
+				if (validationJoueur2) printf("recoitCoup : validation du coup du joueur NORD = VALID\n");
+
+				
+
+				reponseCoupJoueur2.propCoup = propCoupJoueur2;
+				if (validationJoueur2)
+				{
+					reponseCoupJoueur2.err = ERR_OK;
+					reponseCoupJoueur2.validCoup = VALID;
+				}
+				else{
+					reponseCoupJoueur2.err = ERR_OK;
+					reponseCoupJoueur2.validCoup = TRICHE;
+				}
+				//envoi de la validation au joueur 2 (NORD)
+				err = send(joueur2, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur2);
+					
+				}
+
+				//envoi de la validation au joueur 1 (SUD)
+				err = send(joueur1, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+				//envoi du coup au joueur adverse (SUD)
+				if (validationJoueur2 && propCoupJoueur2==CONT)
+				{
+					err = send(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+					if (err <= 0){
+							perror("(joueur) erreur sur le send coup");
+							shutdown(joueur1, SHUT_RDWR); close(joueur1);
+						
+					}
+				}
+				else{
+					finPartie = true;
+				}
+			}
+			else{
+				finPartie = true;
+			}
+
+			
+		}
+		//pour commencer la partie retour
+		finPartie = false;
+
+		//Partie retour 
+
+		//initialisation de la partie aller (1)
+		//initialiserPartie();
+		printf("Début Partie Retour (Le joueur ayant sens NORD commence)\n");
+
+		while(!finPartie){
+			//reinitialiser les descripteurs
+			FD_ZERO(&readSet);
+			FD_SET(joueur1,&readSet);
+			FD_SET(joueur2,&readSet);
+			//recevoir la requete coup du premier joueur (NORD)
+			printf("Attente coup joueur (NORD)\n");
+			err = recv(joueur2, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+			if (err <= 0) {
+				perror("(clientTCP) erreur dans la reception");
+				shutdown(joueur2, SHUT_RDWR); close(joueur2);
+			return -4;
+			}
+			//validation du coup du premier joueur (NORD)
+
+			validationJoueur2 = validationCoup(1, requeteCoupJoueur2, &propCoupJoueur2);
+
+			
+
+			reponseCoupJoueur2.propCoup = propCoupJoueur2;
+			if (validationJoueur2)
+			{
+				reponseCoupJoueur2.err = ERR_OK;
+				reponseCoupJoueur2.validCoup = VALID;
+			}
+			else{
+				reponseCoupJoueur2.err = ERR_OK;
+				reponseCoupJoueur2.validCoup = TRICHE;
+			}
+			//envoi de la validation au joueur 1 (NORD)
+			err = send(joueur2, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				
+			}
+
+			//envoi de la validation au joueur 2 (SUD)
+			err = send(joueur1, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
+				
+			}
+			//la partie aller se continue
+			if (validationJoueur2 && propCoupJoueur2==CONT)
+			{
+				//envoi du coup au joueur adverse (SUD)
+				err = send(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+				//recevoir la requete coup du deuxième joueur (SUD)
+				err = recv(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(clientTCP) erreur dans la reception");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
+				return -4;
+				}
+				//validation du coup du deuxième joueur (SUD)
+
+				validationJoueur1 = validationCoup(2, requeteCoupJoueur1, &propCoupJoueur1);
+
+				
+
+				reponseCoupJoueur1.propCoup = propCoupJoueur1;
+				if (validationJoueur1)
+				{
+					reponseCoupJoueur1.err = ERR_OK;
+					reponseCoupJoueur1.validCoup = VALID;
+				}
+				else{
+					reponseCoupJoueur1.err = ERR_OK;
+					reponseCoupJoueur1.validCoup = TRICHE;
+				}
+				//envoi de la validation au joueur 2 (SUD)
+				err = send(joueur1, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+
+				//envoi de la validation au joueur 2 (NORD)
+				err = send(joueur2, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					
+				}
+				//envoi du coup au joueur adverse (NORD)
+				if (validationJoueur1 && propCoupJoueur1==CONT)
+				{
+					err = send(joueur2, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+					if (err <= 0){
+							perror("(joueur) erreur sur le send coup");
+							shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					}
+				}
+				else{
+					finPartie = true;
+				}
+			}
+			else{
+				finPartie = true;
+			}
+
+			
+		}
+
+
+			
+			
+			
+		
+			
+
 
 		}
 		
 
+	finPartie = false;
+
+	//dans le cas ou celui qui demande le sens en deuxième est SUD
+	if (firstIsSecond)
+	{
+		//initialisation de la partie aller (1)
+		initialiserPartie();
+		printf("Début Partie Aller (Le joueur ayant sens SUD commence)\n");
+
+		while(!finPartie){
+			//reinitialiser les descripteurs
+			FD_ZERO(&readSet);
+			FD_SET(joueur1,&readSet);
+			FD_SET(joueur2,&readSet);
+			//recevoir la requete coup du premier joueur (NORD)
+			printf("Attente coup joueur (NORD)\n");
+			err = recv(joueur2, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+			if (err <= 0) {
+				perror("(clientTCP) erreur dans la reception");
+				shutdown(joueur2, SHUT_RDWR); close(joueur2);
+			return -4;
+			}
+			//validation du coup du premier joueur (NORD)
+
+			validationJoueur2 = validationCoup(1, requeteCoupJoueur2, &propCoupJoueur2);
+
+			
+
+			reponseCoupJoueur2.propCoup = propCoupJoueur2;
+			if (validationJoueur2)
+			{
+				reponseCoupJoueur2.err = ERR_OK;
+				reponseCoupJoueur2.validCoup = VALID;
+			}
+			else{
+				reponseCoupJoueur2.err = ERR_OK;
+				reponseCoupJoueur2.validCoup = TRICHE;
+			}
+			//envoi de la validation au joueur 1 (NORD)
+			err = send(joueur2, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				
+			}
+
+			//envoi de la validation au joueur 2 (SUD)
+			err = send(joueur1, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
+				
+			}
+			//la partie aller se continue
+			if (validationJoueur2 && propCoupJoueur2==CONT)
+			{
+				//envoi du coup au joueur adverse (SUD)
+				err = send(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+				//recevoir la requete coup du deuxième joueur (SUD)
+				err = recv(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(clientTCP) erreur dans la reception");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
+				return -4;
+				}
+				//validation du coup du deuxième joueur (SUD)
+
+				validationJoueur1 = validationCoup(2, requeteCoupJoueur1, &propCoupJoueur1);
+
+				
+
+				reponseCoupJoueur1.propCoup = propCoupJoueur1;
+				if (validationJoueur1)
+				{
+					reponseCoupJoueur1.err = ERR_OK;
+					reponseCoupJoueur1.validCoup = VALID;
+				}
+				else{
+					reponseCoupJoueur1.err = ERR_OK;
+					reponseCoupJoueur1.validCoup = TRICHE;
+				}
+				//envoi de la validation au joueur 2 (SUD)
+				err = send(joueur1, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+
+				//envoi de la validation au joueur 2 (NORD)
+				err = send(joueur2, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					
+				}
+				//envoi du coup au joueur adverse (NORD)
+				if (validationJoueur1 && propCoupJoueur1==CONT)
+				{
+					err = send(joueur2, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+					if (err <= 0){
+							perror("(joueur) erreur sur le send coup");
+							shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					}
+				}
+				else{
+					finPartie = true;
+				}
+			}
+			else{
+				finPartie = true;
+			}
+
+			
+		}
+		//pour commencer la partie retour
+		finPartie = false;
+
+		//Partie retour 
+
+		//initialisation de la partie aller (1)
+		initialiserPartie();
+		printf("Début Partie Retour (Le joueur ayant sens NORD commence)\n");
+
+		while(!finPartie){
+			//reinitialiser les descripteurs
+			FD_ZERO(&readSet);
+			FD_SET(joueur1,&readSet);
+			FD_SET(joueur2,&readSet);
+			//recevoir la requete coup du premier joueur (SUD)
+			err = recv(joueur1, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+			if (err <= 0) {
+				perror("(clientTCP) erreur dans la reception");
+				shutdown(joueur1, SHUT_RDWR); close(joueur1);
+			return -4;
+			}
+			//validation du coup du premier joueur (SUD)
+
+			validationJoueur1 = validationCoup(1, requeteCoupJoueur1, &propCoupJoueur1);
+			
+			reponseCoupJoueur1.propCoup = propCoupJoueur1;
+			if (validationJoueur1)
+			{
+				printf("recoitCoup : validation du coup du joueur SUD = VALID\n");
+				reponseCoupJoueur1.err = ERR_OK;
+				reponseCoupJoueur1.validCoup = VALID;
+			}
+			else{
+				printf("recoitCoup : validation du coup du joueur SUD = TRICHE\n");
+				reponseCoupJoueur1.err = ERR_OK;
+				reponseCoupJoueur1.validCoup = TRICHE;
+			}
+			//envoi de la validation au joueur 1 (SUD)
+			err = send(joueur1, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur1, SHUT_RDWR); close(joueur1);
+				
+			}
+
+			//envoi de la validation au joueur 2 (NORD)
+			err = send(joueur2, &reponseCoupJoueur1, sizeof(TCoupRep), 0);
+			if (err <= 0){
+					perror("(joueur) erreur sur le send coup");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				
+			}
+			//La partie aller se continue
+			if (validationJoueur1 && propCoupJoueur1==CONT)
+			{
+				//envoi du coup au joueur adverse (NORD)
+				err = send(joueur2, &requeteCoupJoueur1, sizeof(TCoupReq), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur2, SHUT_RDWR); close(joueur2);
+					
+				}
+				//recevoir la requete coup du deuxième joueur (NORD)
+				err = recv(joueur2, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+				if (err <= 0) {
+					perror("(clientTCP) erreur dans la reception");
+					shutdown(joueur2, SHUT_RDWR); close(joueur2);
+				return -4;
+				}
+				//validation du coup du deuxième joueur (NORD)
+
+				validationJoueur2 = validationCoup(2, requeteCoupJoueur2, &propCoupJoueur2);
+				if (validationJoueur2) printf("recoitCoup : validation du coup du joueur NORD = VALID\n");
+
+				
+
+				reponseCoupJoueur2.propCoup = propCoupJoueur2;
+				if (validationJoueur2)
+				{
+					reponseCoupJoueur2.err = ERR_OK;
+					reponseCoupJoueur2.validCoup = VALID;
+				}
+				else{
+					reponseCoupJoueur2.err = ERR_OK;
+					reponseCoupJoueur2.validCoup = TRICHE;
+				}
+				//envoi de la validation au joueur 2 (NORD)
+				err = send(joueur2, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur2);
+					
+				}
+
+				//envoi de la validation au joueur 1 (SUD)
+				err = send(joueur1, &reponseCoupJoueur2, sizeof(TCoupRep), 0);
+				if (err <= 0){
+						perror("(joueur) erreur sur le send coup");
+						shutdown(joueur1, SHUT_RDWR); close(joueur1);
+					
+				}
+				//envoi du coup au joueur adverse (SUD)
+				if (validationJoueur2 && propCoupJoueur2==CONT)
+				{
+					err = send(joueur1, &requeteCoupJoueur2, sizeof(TCoupReq), 0);
+					if (err <= 0){
+							perror("(joueur) erreur sur le send coup");
+							shutdown(joueur1, SHUT_RDWR); close(joueur1);
+						
+					}
+				}
+				else{
+					finPartie = true;
+				}
+			}
+			else{
+				finPartie = true;
+			}
+
+			
+		}
+
+		
 
 
-	}
-
-
-
-
+			
+	}	
 
 
 
