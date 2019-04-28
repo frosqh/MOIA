@@ -62,10 +62,46 @@ getKeyList([_,_,_,_,_,_,KeyList,_],KeyList).
 
 getMoveList([_,_,_,_,_,_,_,MoveList],MoveList).
 
+setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList],
+						MoveListBis,
+						[Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]).
+
 addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]):-
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
+getCorrectList(Move, MoveList, CorrectMoveList):-
+	getMoveList(MoveList, RealMoveList),
+	getCorrectListBis(Move, RealMoveList, CorrectMoveList).
+
+getCorrectListBis(Move, [MoveNode|_], MoveNode):-
+	MoveNode = [Move|_],!.
+
+getCorrectListBis(Move, [_|MoveList], CorrectMoveList):-
+	getCorrectList(Move, MoveList, CorrectMoveList).
+
+changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList) :-
+	MoveNode = [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,_],
+	!,
+	ResMoveList = [ToAddMoveList | MoveList].
+
+changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList):-
+	changeMoveList(Move,MoveList,ToAddMoveList,ResMoveList).
+	
+%Ici, remplacer la valeur de la moveList par celle en paramètre pour le bon move
+
+updateValueWin(MoveList, 1, NewMoveList):-
+	incrWinP1(MoveList, NewMoveList).
+
+updateValueWin(MoveList, -1, NewMoveList):-
+	incrWinP2(MoveList, NewMoveList).
+
+updateValueWin(MoveList, 0, NewMoveList):-
+	incrDraw(MoveList, NewMoveList).
+%En fonction  du winner (ou draw), mettre à jour 
+%la valeur correspondant, puis calculer la value UCB1
+
+
 
 
 %--------------------------------------------------------------------------

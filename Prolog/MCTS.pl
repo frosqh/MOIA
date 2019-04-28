@@ -15,27 +15,55 @@
 									%ValueUCB1 = La valeur UCB1 du noeud, afin d'optimiser l'expansion des rollouts
 									%KeyList = La liste des moves fils déjà traités (pour accelérer le traitement UCT)
 									%MoveList = L'arbre des rollouts à partir de ce  noeud
+simu(_, Turn, _, L,_,L, 0) :-
+	Turn > 60,!.
 
+simu(Grid, _, _, L,_,L, Y):-
+	hasWin(Grid,Y),!.
 
-
-simu(_, Turn, _, _,_, 0) :-
-	Turn > 60.
-
-simu(Grid, _, _, _,_, Y):-
-	hasWin(Grid,Y).
-
-simu(Grid, Turn, Player, MoveList, NewMoveList,Winner):-
+simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	allAvailableMoves(Grid,Player,Moves),
-	toExpand(Moves,MoveList,NewMoveList,Winner).
+	toExpand(Moves,MoveList,TmpMoveList,[P,T]),
+	actuallyMovePiece(P,Player,Grid,T,GR),
+	incrThroughs(TmpMoveList, Tmp2MoveList),
+	getCorrectList([P,T], Tmp2MoveList, ListToTreat),
+	Turn1 is Turn+1,
+	NextPlayer is -Player,
+	getThroughs(Tmp2MoveList, Throughs),
+	simu(GR, Turn1, NextPlayer, ListToTreat, Throughs, TmpNewMoveList, Winner),
+	getMoveList(Tmp2MoveList, TmpNewNewMoveList),
+	changeMoveList([P,T], TmpNewNewMoveList, TmpNewMoveList , UpdatedMoveList),
+	setMoveList(Tmp2MoveList, UpdatedMoveList, CompleteUpdatedMoveList),
+	updateValueWin(CompleteUpdatedMoveList, Winner, NMoveList),
+	updateValue(NMoveList, ParentThroughs, NewMoveList).
+
 %Ici, on regarde dans notre moveList si on a un move possible qui n'est pas traité à partir de notre Grid
 %Si c'est le cas, on choisi un de ces moves au random
 %Sinon, on utilise les différentes valeurs UCB1 pour choisir le noeud à traiter
 %Puis, on effectue la simulation au niveau plus bas et on actualise enfin notre bordel avec le through and co ...(Il va falloir séparer la vérification et l'application du move)
 
+isTimeout(Depart):-
+	statistics(runtime, [Fin,_]),
+	Time is (Fin-Depart)/1000,
+	Time < 20*(11/2).
+
+
+simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, FinalMoveList):-
+	isTimeout(Depart),
+	!,
+	simu(Grid,Turn,FirstPlayer, MoveList,1,TmpMoveList,Winner),
+	simuUntilTimeout(Depart, TmpMoveList, Grid, Turn, FirstPlayer, FinalMoveList).
+
+simuUntilTimeout(_, MoveList, _, _, _, MoveList).
+
 
 allAvailableMoves(G, 1, LR) :-
 	G = [P1,_],
 	pieceAvailableMoves(P1, G, 1, LR).
+
+allAvailableMoves(G, -1, LR) :-
+	G = [_,P2],
+	pieceAvailableMoves(P2, G, -1, LR).
 
 pieceAvailableMoves([],_,_,[]).
 pieceAvailableMoves([P|L], G, J, LR):-
@@ -58,7 +86,6 @@ toExpand(Moves, MoveList, NewMoveList, MoveToExpand) :-
 	Upper is Size-1,
 	random(0,Upper,Index),
 	nth0(Index, NotTreatedMoves,  MoveToExpand),
-	display(MoveToExpand),
 	addMove(MoveToExpand, MoveList, NewMoveList).
 
 toExpand(Moves, MoveList, MoveList, MoveToExpand) :-
@@ -73,6 +100,6 @@ notAlreadyTreated([M|Moves], KeyList, NotTreatedMoves):-
 	notAlreadyTreated(Moves,KeyList,TmpNotTreatedMoves),
 	append([M], TmpNotTreatedMoves, NotTreatedMoves).
 
-notre([M|Moves], KeyList, NotTreatedMoves):-
+notAlreadyTreated([M|Moves], KeyList, NotTreatedMoves):-
 	notAlreadyTreated(Moves,KeyList,NotTreatedMoves).
 	

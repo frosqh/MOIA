@@ -46,7 +46,9 @@ test3(R):-
 	initialGrid(G),
 	piece(Kodama,kodama),
 	P = [[2,2],Kodama],
-	movePiece(P,1,G,R).
+	movePiece(P,1,G,GR),
+	P2 = [[1,2],Kodama],
+	movePiece(P2,1,GR,R).
 
 test4(R):-
 	initialGrid(G),
@@ -71,6 +73,15 @@ test6(R):-
 test7(R):-
 	initialGrid(G),
 	statistics(runtime,[Depart,_]),
-	simu(G,0,1,[0,0,0,0,0,0,[],[]],R,C),
-	display(Depart,R).
-	
+	simu(G,0,1,[0,0,0,0,0,0,[],[]],MoveList,Winner),
+	simu(G,0,1,MoveList,R,M),
+	display(Depart,R),
+	nl,
+	display(M).
+
+test8(R):-
+	initialGrid(G),
+	statistics(runtime,[Depart,_]),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, 1, R),
+	display(Depart,R),
+	nl.
