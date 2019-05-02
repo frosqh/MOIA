@@ -45,7 +45,7 @@ simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 isTimeout(Depart):-
 	statistics(runtime, [Fin,_]),
 	Time is (Fin-Depart)/1000,
-	Time < 20*(11/2).
+	Time < 10.
 
 
 simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, FinalMoveList):-

@@ -67,7 +67,8 @@ setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList],
 						[Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]).
 
 addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
-						, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]):-
+						, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList1,MoveListBis]):-
+		append(Move1, KeyList, KeyList1),
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
 getCorrectList(Move, MoveList, CorrectMoveList):-
