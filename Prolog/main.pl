@@ -108,14 +108,20 @@ testJasper([],[],J,0,R,LR):-
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, LR),
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
-	getMove(P,R),
+	getMove(P,[[[A,B],N],[C,D]]),
+    E is 5-B,
+    F is 5-D,
+    R = [[[A,E],N],[C,F]],
 	write(R),nl.
-testJasper(G,M,J,R,LR):-
+testJasper(G,M,J,T,R,LR):-
 	statistics(runtime,[Depart,_]),
 	simuUntilTimeout(Depart,M,G,T,J,LR),
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
-	getMove(P,R),
+	getMove(P,[[[A,B],N],[C,D]]),
+    E is 5-B,
+    F is 5-D,
+    R = [[[A,E],N],[C,F]],
 	write(R),nl.
 
 getMaxWinRate([M],M):-!.
