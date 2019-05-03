@@ -26,7 +26,7 @@ simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	length(TMP, TR),
 	allAvailablePlays(Grid,Player,Moves),
 	toExpand(Moves,MoveList,TmpMoveList,[P,T]),
-	actuallyMovePiece(P,Player,Grid,T,GR),w
+	actuallyMovePiece(P,Player,Grid,T,GR),
 	incrThroughs(TmpMoveList, Tmp2MoveList),
 	getCorrectList([P,T], Tmp2MoveList, ListToTreat),
 	Turn1 is Turn+1,
@@ -46,7 +46,7 @@ simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 isTimeout(Depart):-
 	statistics(runtime, [Fin,_]),
 	Time is (Fin-Depart)/1000,
-	Time < 10.
+	Time < 5.
 
 
 simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, FinalMoveList):-

@@ -94,3 +94,36 @@ test9(R):-
 	notAlreadyTreated(L,KeyList,R),
 	length(R,A),
 	write(A).
+
+%G : Etat de la grille ([] si début)
+%M : Etat de la liste de couts ([] si début)
+%J : Joueur
+%R : Meilleur Move
+%LR : MoveList
+%T : Tour
+testJasper([],[],J,0,R,LR):-
+	!,
+	initialGrid(G),
+	statistics(runtime,[Depart,_]),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, LR),
+	getMoveList(LR,L),
+	getMaxWinRate(L,P),
+	getMove(P,R),
+	write(R),nl.
+testJasper(G,M,J,R,LR):-
+	statistics(runtime,[Depart,_]),
+	simuUntilTimeout(Depart,M,G,T,J,LR),
+	getMoveList(LR,L),
+	getMaxWinRate(L,P),
+	getMove(P,R),
+	write(R),nl.
+
+getMaxWinRate([M],M):-!.
+getMaxWinRate([M|L],R):-
+	getMaxWinRate(L,T),
+	getWinP1(M,WM),
+	getThroughs(M,TM),
+	getWinP1(T,WT),
+	getThroughs(T,TT),
+	getMaxMove(M,WM/TM,T,WT/TT,R).
+	
