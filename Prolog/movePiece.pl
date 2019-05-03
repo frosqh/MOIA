@@ -64,7 +64,7 @@ moveO(A,J,R) :- moveBackwardLeft(A,J,R).
 validCoorGrid([X,Y]):-
 	X >= 0,
 	Y >= 0,
-	5 >= X,
+	5 > X,
 	5 >= Y.%TODO Rajouter la gestion des interdictions + deux yokai sur la même case
 
 
@@ -74,9 +74,9 @@ validCoorGrid([X,Y]):-
 				%C = Coordonnées de la pièce
 				%J = Identifiant du joueur
 				%G = Grille de jeu
-validSuper(C,1,[P1,_]):-
+validSuper(C,1,[P1,_,_,_]):-
 	validSuperBis(C,P1).
-validSuper(C,-1,[_,P2]):-
+validSuper(C,-1,[_,P2,_,_]):-
 	validSuperBis(C,P2).
 
 %:-validSuperBis/2
@@ -165,10 +165,15 @@ piece(6,super_oni).
 						%I = Identifiant de la pièce
 				%J = Identifiant du joueur
 				%G = Grille de jeu
-own(P,1,[G,_]):-
+own(P,1,[G,_,_,_]):-
 	member(P,G).
-own(P,-1,[_,G]):-
+own(P,-1,[_,G,_,_]):-
 	member(P,G).
+
+ownDrop(P,1,[_,_,C,_]):-
+	member(P,C).
+ownDrop(P,-1,[_,_,_,C]):-
+	member(P,C).
 
 %:-attack/3
 %Met à jour la grille si une attaque a lieu
@@ -212,7 +217,37 @@ availableMovePiece([A,N], J, G, T):-
 	validCoorGrid(T),
 	validSuper(T,J,G).
 
+availableDrop(N, J, G, T):-
+	ownDrop(N,J,G),
+	gridCase(T),
+	Opp is -J,
+	validSuper(T,J,G),
+	validSuper(T,Opp,G),
+	validKodamaDrop(N, J, G, T).
+
+actuallyMovePiece([[-1,-1],N],J,G,T,GR):-
+	!,
+	dropGrid(N, J, G, T, GR).
+
 actuallyMovePiece([A,N], J, G, T, GR):-
 	upgrade([T,N], J, R),
 	attack(R,J,G,NG),
 	updateGrid(NG,[A,N],J,R,GR).
+
+validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
+	!,
+	B \= 5,
+	validColumn(A,P1).
+
+validKodamaDrop(Kodama, -1,[P2,_,_,_], [A,B]):-
+	!,
+	B \= 5,
+	validColumn(A,P2).
+
+validKodamaDrop(_,_,_,_).
+
+validColumn(A,[]).
+validColumn(A,[[[A,B],1]|_]):-
+	!,fail.
+validColumn(A,[T|P]):-
+	validColumn(A,P).

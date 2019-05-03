@@ -48,8 +48,8 @@ test3(R):-
 	piece(Kodama,kodama),
 	P = [[2,2],Kodama],
 	movePiece(P,1,G,GR),
-	P2 = [[1,2],Kodama],
-	movePiece(P2,1,GR,R).
+	write(GR),nl,
+	availableDrop(Kodama, 1, GR, R).
 
 test4(R):-
 	initialGrid(G),

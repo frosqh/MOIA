@@ -24,9 +24,9 @@ simu(Grid, _, _, L,_,L2, Y):-
 simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	getMoveList(MoveList, TMP),
 	length(TMP, TR),
-	allAvailableMoves(Grid,Player,Moves),
+	allAvailablePlays(Grid,Player,Moves),
 	toExpand(Moves,MoveList,TmpMoveList,[P,T]),
-	actuallyMovePiece(P,Player,Grid,T,GR),
+	actuallyMovePiece(P,Player,Grid,T,GR),w
 	incrThroughs(TmpMoveList, Tmp2MoveList),
 	getCorrectList([P,T], Tmp2MoveList, ListToTreat),
 	Turn1 is Turn+1,
@@ -57,13 +57,17 @@ simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, FinalMoveList):-
 
 simuUntilTimeout(_, MoveList, _, _, _, MoveList).
 
+allAvailablePlays(G,J,R):-
+	allAvailableMoves(G,J,MR),
+	allAvailableDrops(G,J,DR),
+	append(MR,DR,R).
 
 allAvailableMoves(G, 1, LR) :-
-	G = [P1,_],
+	G = [P1,_,_,_],
 	pieceAvailableMoves(P1, G, 1, LR).
 
 allAvailableMoves(G, -1, LR) :-
-	G = [_,P2],
+	G = [_,P2,_,_],
 	pieceAvailableMoves(P2, G, -1, LR).
 
 pieceAvailableMoves([],_,_,[]).
@@ -77,6 +81,25 @@ createMoves([],_,[]).
 createMoves([T|L],P,LR):-
 	createMoves(L,P,LLR),
 	append([[P,T]],LLR,LR).
+
+allAvailableDrops(G,1,LR):-
+	G = [_,_,P1,_],
+	pieceAvailableDrops(P1,G,1,LR).
+allAvailableDrops(G,-1,LR):-
+	G = [_,_,_,P2],
+	pieceAvailableDrops(P2,G,-1,LR).
+
+pieceAvailableDrops([],_,_,[]).
+pieceAvailableDrops([P|L], G, J, LR):-
+	findall(T, availableDrop(P,J,G,T), LPR),
+	createDrops(LPR, P,LLR),
+	pieceAvailableDrops(L, G, J, LTR),
+	append(LLR, LTR, LR).
+
+createDrops([],_,[]).
+createDrops([T|L],P,LR):-
+	createDrops(L,P,LLR),
+	append([[[[-1,-1],P],T]],LLR,LR).
 
 toExpand(Moves, MoveList, NewMoveList, MoveToExpand) :-
 	getKeyList(MoveList, KeyList),
