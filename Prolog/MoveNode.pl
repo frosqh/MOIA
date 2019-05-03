@@ -37,26 +37,26 @@ updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
 
 getValue([_,_,_,_,_,ValueUCB1,_,_],ValueUCB1).
 
-maxValue(MoveList, MaxMove):-
+maxValue(MoveList,MaxMove):-
 	getMoveList(MoveList,MoveListMoveList),
-	maxValueBis(MoveListMoveList,MaxMove).
+	getThroughs(MoveList, PT),
+	maxValueBis(MoveListMoveList,PT,MaxMove).
 
-maxValueBis([MoveNode], MaxMove):-
-	getValue(MoveNode, MaxMove).
+maxValueBis([MoveNode],_, MoveNode).
 
-maxValueBis([MoveNode | MoveList], MaxMove):-
-	maxValueBis(MoveList, TempMaxMove),
-	getValue(MoveNode, Value1),
-	getValue(MoveNode, Value2),
-	getMaxMove(MoveNode,Value1,TempMaxMove,Value2,MaxMove).
+maxValueBis([MoveNode | MoveList], PT, MaxMove):-
+	maxValueBis(MoveList, PT, TempMaxMove),
+	updateValue(MoveNode,PT,MoveNode2),
+	updateValue(TempMaxMove, PT, TempMaxMove2),
+	getValue(MoveNode2, Value1),
+	getValue(TempMaxMove2, Value2),
+	getMaxMove(MoveNode2,Value1,TempMaxMove2,Value2,MaxMove).
 
-getMaxMove(Move1, Value1, _, Value2, ResMove):-
-	Value1 >= Value2,
-	ResMove = Move1.
+getMaxMove(Move1, Value1, _, Value2, Move1):-
+	Value1 >= Value2.
 
-getMaxMove(_, Value1, Move2, Value2, ResMove):-
-	Value1 < Value2,
-	ResMove = Move2.
+getMaxMove(_, Value1, Move2, Value2, Move2):-
+	Value1 < Value2.
 
 getKeyList([_,_,_,_,_,_,KeyList,_],KeyList).
 
@@ -68,7 +68,7 @@ setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList],
 
 addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList1,MoveListBis]):-
-		append(Move1, KeyList, KeyList1),
+		append([Move1], KeyList, KeyList1),
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
 getCorrectList(Move, MoveList, CorrectMoveList):-
@@ -79,7 +79,7 @@ getCorrectListBis(Move, [MoveNode|_], MoveNode):-
 	MoveNode = [Move|_],!.
 
 getCorrectListBis(Move, [_|MoveList], CorrectMoveList):-
-	getCorrectList(Move, MoveList, CorrectMoveList).
+	getCorrectListBis(Move, MoveList, CorrectMoveList).
 
 changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList) :-
 	MoveNode = [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,_],

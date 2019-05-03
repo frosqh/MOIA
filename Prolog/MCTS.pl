@@ -15,11 +15,11 @@
 									%ValueUCB1 = La valeur UCB1 du noeud, afin d'optimiser l'expansion des rollouts
 									%KeyList = La liste des moves fils déjà traités (pour accelérer le traitement UCT)
 									%MoveList = L'arbre des rollouts à partir de ce  noeud
-simu(_, Turn, _, L,_,L, 0) :-
-	Turn > 60,!.
+simu(_, Turn, _, L,_,L2, 0) :-
+	Turn > 62,!,incrThroughs(L,L2).
 
-simu(Grid, _, _, L,_,L, Y):-
-	hasWin(Grid,Y),!.
+simu(Grid, _, _, L,_,L2, Y):-
+	hasWin(Grid,Y),!,incrThroughs(L,L2).
 
 simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	allAvailableMoves(Grid,Player,Moves),
@@ -34,9 +34,7 @@ simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	getMoveList(Tmp2MoveList, TmpNewNewMoveList),
 	changeMoveList([P,T], TmpNewNewMoveList, TmpNewMoveList , UpdatedMoveList),
 	setMoveList(Tmp2MoveList, UpdatedMoveList, CompleteUpdatedMoveList),
-	updateValueWin(CompleteUpdatedMoveList, Winner, NMoveList),
-	updateValue(NMoveList, ParentThroughs, NewMoveList).
-
+	updateValueWin(CompleteUpdatedMoveList, Winner, NewMoveList).
 %Ici, on regarde dans notre moveList si on a un move possible qui n'est pas traité à partir de notre Grid
 %Si c'est le cas, on choisi un de ces moves au random
 %Sinon, on utilise les différentes valeurs UCB1 pour choisir le noeud à traiter
@@ -80,16 +78,10 @@ createMoves([T|L],P,LR):-
 toExpand(Moves, MoveList, NewMoveList, MoveToExpand) :-
 	getKeyList(MoveList, KeyList),
 	notAlreadyTreated(Moves, KeyList, NotTreatedMoves),
-	write(Moves),
-	nl,
-	write(NotTreatedMoves),
-	nl,
-	sleep(5),
 	NotTreatedMoves \= [],
 	!, % Pour ne pas recalculer notAlreadyTreated
 	length(NotTreatedMoves, Size),
-	Upper is Size-1,
-	random(0,Upper,Index),
+	random(0,Size,Index),
 	nth0(Index, NotTreatedMoves,  MoveToExpand),
 	addMove(MoveToExpand, MoveList, NewMoveList).
 

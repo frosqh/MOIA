@@ -1,6 +1,7 @@
 :-use_module(library(plunit)).
 :-use_module(library(random)).
 :-use_module(library(lists)).
+:-use_module(library(system)).
 :-set_prolog_flag(toplevel_print_options,[max_depth(0)]).
 :-set_prolog_flag(double_quotes, chars).
 :-['./movePiece.pl'].
@@ -70,7 +71,7 @@ test6(R):-
 	initialGrid(G),
 	allAvailableMoves(G,1,R).
 
-test7(R):-
+test7:-
 	initialGrid(G),
 	statistics(runtime,[Depart,_]),
 	simu(G,0,1,[0,0,0,0,0,0,[],[]],1,MoveList,Winner),
@@ -85,3 +86,12 @@ test8(R):-
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, 1, R),
 	display(Depart,R),
 	nl.
+
+test9(R):-
+	initialGrid(G),
+	allAvailableMoves(G,1,L),
+	L = [M1|L1],
+	KeyList = [M1],
+	notAlreadyTreated(L,KeyList,R),
+	length(R,A),
+	write(A).
