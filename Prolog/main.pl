@@ -75,10 +75,9 @@ test7:-
 	initialGrid(G),
 	statistics(runtime,[Depart,_]),
 	simu(G,0,1,[0,0,0,0,0,0,[],[]],1,MoveList,Winner),
-	simu(G,0,1,MoveList,2,R,M),
-	display(Depart,R),
-	nl,
-	display(M).
+	%getValue(MoveList, Value),
+	%updateValue(MoveList, 5, D),
+	simu(G,0,1,MoveList,2,_,_).
 
 test8(R):-
 	initialGrid(G),

@@ -22,6 +22,8 @@ simu(Grid, _, _, L,_,L2, Y):-
 	hasWin(Grid,Y),!,incrThroughs(L,L2).
 
 simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
+	getMoveList(MoveList, TMP),
+	length(TMP, TR),
 	allAvailableMoves(Grid,Player,Moves),
 	toExpand(Moves,MoveList,TmpMoveList,[P,T]),
 	actuallyMovePiece(P,Player,Grid,T,GR),
@@ -34,7 +36,8 @@ simu(Grid, Turn, Player, MoveList, ParentThroughs, NewMoveList,Winner):-
 	getMoveList(Tmp2MoveList, TmpNewNewMoveList),
 	changeMoveList([P,T], TmpNewNewMoveList, TmpNewMoveList , UpdatedMoveList),
 	setMoveList(Tmp2MoveList, UpdatedMoveList, CompleteUpdatedMoveList),
-	updateValueWin(CompleteUpdatedMoveList, Winner, NewMoveList).
+	updateValueWin(CompleteUpdatedMoveList, Winner, NMoveList),
+	updateValue(NMoveList, Throughs, NewMoveList).
 %Ici, on regarde dans notre moveList si on a un move possible qui n'est pas traité à partir de notre Grid
 %Si c'est le cas, on choisi un de ces moves au random
 %Sinon, on utilise les différentes valeurs UCB1 pour choisir le noeud à traiter

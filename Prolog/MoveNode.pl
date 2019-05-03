@@ -2,6 +2,8 @@
 
 getC(C):-
 	C is sqrt(2).
+getD(D):-
+	D is 1/3.
 
 getMove([Move,_,_,_,_,_,_,_],Move).
 
@@ -33,7 +35,8 @@ updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
 						, ParentThroughs
 						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
 	getC(C),
-	ValueUCBR is (WinP1/Throughs) + C*sqrt(log(ParentThroughs)/Throughs).
+	getD(D),
+	ValueUCBR is (WinP1/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
 
 getValue([_,_,_,_,_,ValueUCB1,_,_],ValueUCB1).
 
@@ -87,7 +90,8 @@ changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList) :-
 	ResMoveList = [ToAddMoveList | MoveList].
 
 changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList):-
-	changeMoveList(Move,MoveList,ToAddMoveList,ResMoveList).
+	changeMoveList(Move,MoveList,ToAddMoveList,TMoveList),
+	append([MoveNode],TMoveList, ResMoveList).
 	
 %Ici, remplacer la valeur de la moveList par celle en paramètre pour le bon move
 
