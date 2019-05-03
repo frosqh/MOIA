@@ -80,6 +80,11 @@ createMoves([T|L],P,LR):-
 toExpand(Moves, MoveList, NewMoveList, MoveToExpand) :-
 	getKeyList(MoveList, KeyList),
 	notAlreadyTreated(Moves, KeyList, NotTreatedMoves),
+	write(Moves),
+	nl,
+	write(NotTreatedMoves),
+	nl,
+	sleep(5),
 	NotTreatedMoves \= [],
 	!, % Pour ne pas recalculer notAlreadyTreated
 	length(NotTreatedMoves, Size),
