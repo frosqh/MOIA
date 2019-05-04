@@ -98,25 +98,29 @@ test9(R):-
 %G : Etat de la grille ([] si début)
 %M : Etat de la liste de couts ([] si début)
 %J : Joueur
-%R : Meilleur Move
-%LR : MoveList
+%MJ : Mon idendité
 %T : Tour
-testJasper([],[],J,0,R,LR):-
+%R : Meilleur Move
+%TODO Déterminer mon joueur (Avec une variable MJ par exemple)
+%Pour l'instant, recherche d'un coup gagnant à grand coup 
+testJasper([],[],J,MJ,0,R):-
 	!,
 	initialGrid(G),
 	statistics(runtime,[Depart,_]),
-	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, LR),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LR),
+	display(Depart, 0),
 	getMoveList(LR,L),
+	display(Depart, 0),
 	getMaxWinRate(L,P),
-	getMove(P,R),
-	write(R),nl.
-testJasper(G,M,J,R,LR):-
+	display(Depart, 0),
+	getMove(P,R).
+testJasper(G,M,J,MJ,T,R):-
 	statistics(runtime,[Depart,_]),
-	simuUntilTimeout(Depart,M,G,T,J,LR),
+	simuUntilTimeout(Depart,M,G,T,J,MJ,LR),
+	display(Depart, 0),
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
-	getMove(P,R),
-	write(R),nl.
+	getMove(P,R).
 
 getMaxWinRate([M],M):-!.
 getMaxWinRate([M|L],R):-
@@ -127,3 +131,8 @@ getMaxWinRate([M|L],R):-
 	getThroughs(T,TT),
 	getMaxMove(M,WM/TM,T,WT/TT,R).
 	
+genFile(J,MJ):-
+	initialGrid(G),
+	statistics(runtime,[Depart,_]),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, MJ, LR),
+	write(LR).

@@ -32,25 +32,35 @@ incrDraw([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 getDraw([_,_,_,_,_,Draw,_,_,_],Draw).
 
 updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
+						, 1
 						, ParentThroughs
 						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
 	getC(C),
 	getD(D),
 	ValueUCBR is (WinP1/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
 
+updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
+						, -1
+						, ParentThroughs
+						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
+	getC(C),
+	getD(D),
+	ValueUCBR is (WinP2/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
+
+
 getValue([_,_,_,_,_,ValueUCB1,_,_],ValueUCB1).
 
-maxValue(MoveList,MaxMove):-
+maxValue(MoveList, MJ, MaxMove):-
 	getMoveList(MoveList,MoveListMoveList),
 	getThroughs(MoveList, PT),
-	maxValueBis(MoveListMoveList,PT,MaxMove).
+	maxValueBis(MoveListMoveList,MJ, PT,MaxMove).
 
-maxValueBis([MoveNode],_, MoveNode).
+maxValueBis([MoveNode],_,_, MoveNode).
 
-maxValueBis([MoveNode | MoveList], PT, MaxMove):-
-	maxValueBis(MoveList, PT, TempMaxMove),
-	updateValue(MoveNode,PT,MoveNode2),
-	updateValue(TempMaxMove, PT, TempMaxMove2),
+maxValueBis([MoveNode | MoveList],MJ, PT, MaxMove):-
+	maxValueBis(MoveList,MJ, PT, TempMaxMove),
+	updateValue(MoveNode,MJ,PT,MoveNode2),
+	updateValue(TempMaxMove,MJ, PT, TempMaxMove2),
 	getValue(MoveNode2, Value1),
 	getValue(TempMaxMove2, Value2),
 	getMaxMove(MoveNode2,Value1,TempMaxMove2,Value2,MaxMove).
