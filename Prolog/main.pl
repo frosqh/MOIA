@@ -105,37 +105,36 @@ test9(R):-
 %R : Meilleur Move
 %TODO Déterminer mon joueur (Avec une variable MJ par exemple)
 %Pour l'instant, recherche d'un coup gagnant à grand coup 
-testJasper([],[],J,MJ,0,R):-
+testJasper([],[],J,MJ,0,R,LR):-
 	!,
-	initialGrid(G),
 	statistics(runtime,[Depart,_]),
+	initialGrid(G),
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LR),
 	getThroughs(LR, Throughs),
 	getWinP1(LR,WinP1),
 	getDraw(LR,Draw),
-	write('Throughs : '),write(Throughs),nl,
-	write('Win : '),write(WinP1),nl,
-	write('Draw : '),write(Draw),nl,
 	display(Depart, 0),
 	getMoveList(LR,L),
 	display(Depart, 0),
 	getMaxWinRate(L,P),
-	getMove(P,[[[A,B],N],[C,D]]),
-    E is 5-B,
-    F is 5-D,
-    R = [[[A,E],N],[C,F]].
-testJasper(G,M,J,MJ,T,R):-
+	getMove(P,TR),
+  correct(TR,R).
+testJasper(MoveHistory,MT,J,MJ,T,R,LR):-
 	statistics(runtime,[Depart,_]),
+	initialGrid(TG),
+	startPlayer(J,T,FJ),
+	reApplyMoves(MoveHistory, FJ, TG, G),
+	last(MoveHistory,LastMove),
+	correct(LastMove, CorrectedLastMove),
+	getCorrectList(CorrectedLastMove, MT, M),
 	simuUntilTimeout(Depart,M,G,T,J,MJ,LR),
 	display(Depart, 0),
 	getThroughs(LR, Throughs),
-	write("Throughs : "),write(Throughs),nl,
+	write('Throughs : '),write(Throughs),nl,
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
-	getMove(P,[[[A,B],N],[C,D]]),
-    E is 5-B,
-    F is 5-D,
-    R = [[[A,E],N],[C,F]].
+	getMove(P,TR),
+  correct(TR,R).
 
 getMaxWinRate([M],M):-!.
 getMaxWinRate([M|L],R):-
@@ -145,6 +144,26 @@ getMaxWinRate([M|L],R):-
 	getWinP1(T,WT),
 	getThroughs(T,TT),
 	getMaxMove(M,WM/TM,T,WT/TT,R).
+
+startPlayer(T,J,FJ):-
+	T mod 2 = 1,
+	!,
+	FJ is -J.
+
+startPlayer(T,J,J).
+
+reApplyMoves([],_,G,G):-write('Hey ! '),write(G),nl.
+
+reApplyMoves([[M,T]|MH],J,TG,G):-
+	correct([M,T],[M2,T2]),
+	write([M2,T2]),nl,
+	actuallyMovePiece(M2,J,TG,T2,GR),
+	Opp is -J,
+	reApplyMoves(MH,Opp,GR,G).
+
+correct([[[A,B],C],[D,E]],[[[A,F],C],[D,G]]):-
+	F is 5-B,
+	G is 5-E.
 	
 genFile(J,MJ):-
 	initialGrid(G),
@@ -180,3 +199,9 @@ testMat :-
 	G = [P1,P2,[],[]],
 	hasWin(G,J),
 	write(J),nl.
+
+testTestJasper:-
+	testJasper([],[],1,1,0,R,LR),
+	MH = [R],
+	testJasper(MH,LR,-1,1,1,R2,LR2),
+	write(R2),nl.
