@@ -137,6 +137,38 @@ testJasper(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
 	isCapture(TR, J, G, Capture),
   correct(TR,R).
 
+testJasper2([],[],J,MJ,0,R,LR,Capture):-
+	!,
+	statistics(runtime,[Depart,_]),
+	initialGrid(G),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LR),
+	getThroughs(LR, Throughs),
+	getWinP1(LLR,WinP1),
+	getDraw(LLR,Draw),
+	display(Depart, 0),
+	getMoveList(LLR,L),
+	display(Depart, 0),
+	getMaxWinRate(L,LR),
+	getMove(LR,TR),
+	isCapture(TR, J, G, Capture),
+  correct(TR,R).
+testJasper2(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
+	statistics(runtime,[Depart,_]),
+	initialGrid(TG),
+	startPlayer(J,T,FJ),
+	reApplyMoves(MoveHistory, FJ, TG, G),
+	last(MoveHistory,LastMove),
+	correct(LastMove, CorrectedLastMove),
+	getCorrectList(CorrectedLastMove, MT, M),
+	simuUntilTimeout(Depart,M,G,T,J,MJ,LLR),
+	display(Depart, 0),
+	getThroughs(LLR, Throughs),
+	getMoveList(LLR,L),
+	getMaxWinRate(L,LR),
+	getMove(LR,TR),
+	isCapture(TR, J, G, Capture),
+  correct(TR,R).
+
 isCapture([_,T],J, G, 1):-
 	Opp is -J,
 	\+ validSuper(T,Opp,G).
