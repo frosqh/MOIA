@@ -29,7 +29,7 @@ incrDraw([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,Throughs,WinP1,WinP2,DraR,ValueUCB1,KeyList,MoveList]):-
 	DraR is Draw+1.
 
-getDraw([_,_,_,_,_,Draw,_,_,_],Draw).
+getDraw([_,_,_,_,Draw,_,_,_],Draw).
 
 updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
 						, 1
@@ -75,7 +75,7 @@ getKeyList([_,_,_,_,_,_,KeyList,_],KeyList).
 
 getMoveList([_,_,_,_,_,_,_,MoveList],MoveList).
 
-setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList],
+setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,_],
 						MoveListBis,
 						[Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]).
 
@@ -95,7 +95,7 @@ getCorrectListBis(Move, [_|MoveList], CorrectMoveList):-
 	getCorrectListBis(Move, MoveList, CorrectMoveList).
 
 changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList) :-
-	MoveNode = [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,_],
+	MoveNode = [Move|_],
 	!,
 	ResMoveList = [ToAddMoveList | MoveList].
 

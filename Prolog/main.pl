@@ -73,11 +73,13 @@ test6(R):-
 
 test7:-
 	initialGrid(G),
-	statistics(runtime,[Depart,_]),
-	simu(G,0,1,[0,0,0,0,0,0,[],[]],1,MoveList,Winner),
-	%getValue(MoveList, Value),
-	%updateValue(MoveList, 5, D),
-	simu(G,0,1,MoveList,2,_,_).
+	simu(G,0,1,1,[0,0,0,0,0,0,[],[]],1,LR,_),
+	getThroughs(LR, Throughs),
+	getWinP1(LR,WinP1),
+	getDraw(LR,Draw),
+	write('Throughs : '),write(Throughs),nl,
+	write('Win : '),write(WinP1),nl,
+	write('Draw : '),write(Draw),nl.
 
 test8(R):-
 	initialGrid(G),
@@ -89,7 +91,7 @@ test8(R):-
 test9(R):-
 	initialGrid(G),
 	allAvailableMoves(G,1,L),
-	L = [M1|L1],
+	L = [M1|_],
 	KeyList = [M1],
 	notAlreadyTreated(L,KeyList,R),
 	length(R,A),
@@ -108,6 +110,12 @@ testJasper([],[],J,MJ,0,R):-
 	initialGrid(G),
 	statistics(runtime,[Depart,_]),
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LR),
+	getThroughs(LR, Throughs),
+	getWinP1(LR,WinP1),
+	getDraw(LR,Draw),
+	write('Throughs : '),write(Throughs),nl,
+	write('Win : '),write(WinP1),nl,
+	write('Draw : '),write(Draw),nl,
 	display(Depart, 0),
 	getMoveList(LR,L),
 	display(Depart, 0),
@@ -115,11 +123,13 @@ testJasper([],[],J,MJ,0,R):-
 	getMove(P,[[[A,B],N],[C,D]]),
     E is 5-B,
     F is 5-D,
-    R = [[[A,E],N],[C,F].
+    R = [[[A,E],N],[C,F]].
 testJasper(G,M,J,MJ,T,R):-
 	statistics(runtime,[Depart,_]),
 	simuUntilTimeout(Depart,M,G,T,J,MJ,LR),
 	display(Depart, 0),
+	getThroughs(LR, Throughs),
+	write("Throughs : "),write(Throughs),nl,
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
 	getMove(P,[[[A,B],N],[C,D]]),
@@ -141,3 +151,32 @@ genFile(J,MJ):-
 	statistics(runtime,[Depart,_]),
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, MJ, LR),
 	write(LR).
+
+testMat :-
+	piece(Kodama, kodama),
+	piece(Oni, oni),
+	piece(SO, super_oni),
+	piece(KP, koropokkuru),
+	piece(KI, kirin),
+	piece(KS, kodama_samourai),
+
+	P1 = [
+				[[0,2],Kodama],
+				[[0,3],Oni],
+				[[1,4],SO],
+				[[3,0],KP],
+				[[3,1],KI],
+				[[3,3],Oni]
+			 ],
+	P2 = [
+				[[0,0],KS],
+				[[1,1],KS],
+				[[1,2],KI],
+				[[2,2],Kodama],
+				[[2,5],KP],
+				[[3,5],KI],
+				[[4,5],Oni]
+			 ],
+	G = [P1,P2,[],[]],
+	hasWin(G,J),
+	write(J),nl.

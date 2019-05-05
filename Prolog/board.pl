@@ -80,7 +80,7 @@ dropGrid(N,-1,[P1,P2,C1,C2],T,[P1,P,C1,C]):-
 				%J = Identifiant du joueur
 				%G = Grille de jeu
 				%NG = Grille après retrait de la pièce [O]
-removePieceFromGrid(T,1,[[[T,P]|G],IG,C1,C2],[G,IG,C1,[P|C1]]).
+removePieceFromGrid(T,1,[[[T,P]|G],IG,C1,C2],[G,IG,C1,[P|C2]]).
 removePieceFromGrid(T,1,[[[T2,P2]|G],IG,C1,C2],[NG,IG,C3,C4]):-
 	T \= T2,
 	removePieceFromGrid(T,1,[G,IG,C1,C2],[NNG,IG,C3,C4]),
@@ -92,16 +92,75 @@ removePieceFromGrid(T,-1,[IG,[[T2,P2]|G],C1,C2],[IG,NG,C3,C4]):-
 	NG = [[T2,P2]|NNG].
 
 
-%:-hasWin/2
+%:-firstHasWin/2
 %Vérifie si un joueur a gagné la partie (no si aucune victoire)
-%hasWin(G,J) : 
+%firstHasWin(G,J) : 
 				%G = Grille de jeu
 				%J = Joueur gagnant [O]
-hasWin([[],_,_,_],-1).
-hasWin([_,[],_,_],1).
-hasWin([_,[[_,N]|G],_,_], 1):-
+firstHasWin([[],_,_,_],-1).
+firstHasWin([_,[],_,_],1).
+firstHasWin([_,[[_,N]|G],_,_], 1):-
 	\+ piece(N,koropokkuru),
-	hasWin([[1],G,[],[]], 1).
-hasWin([[[_,N]|G],_,_,_], -1):-
+	firstHasWin([[1],G,[],[]], 1).
+firstHasWin([[[_,N]|G],_,_,_], -1):-
 	\+ piece(N,koropokkuru),
-	hasWin([G,[1],[],[]], -1).
+	firstHasWin([G,[1],[],[]], -1).
+
+hasWin([P1,P2,_,_], Opp):-
+	%Récupérer les coordonnées du roi de J
+	%Regarder tous les moves des pièces de J dans un rayon de 2 du roi + plus le roi (pour tous, il doit y avoir capture possible par -J tout de même)
+	%Regarder les moves de toutes les pièces de -J dans un rayon du 1 de nouveau roi
+	getKing(P1,P2,J,K),
+	getPiecesWithDistance(K,2,P1,P2,J,Ps),
+	verifMat(Ps,P1,P2,J),
+	Opp is -J.
+
+getKing([[A,Koro]|_],_,1,A):-
+	piece(Koro,koropokkuru),!.
+getKing([_|P],_,1,K):-
+	getKing(P,0,1,K).
+getKing(_,[[A,Koro]|_],-1,A):-
+	piece(Koro,koropokkuru),!.
+getKing(_,[_|P],-1,K):-
+	getKing(0,P,-1,K).
+
+
+getPiecesWithDistance(K,D,[[C,P]|P1],P2,1,Ps):-
+	getDistance(K,C,DK),
+	D >= DK,!,
+	getPiecesWithDistance(K,D,P1,P2,1,Pss),
+	append([[C,P]],Pss,Ps).
+getPiecesWithDistance(K,D,[_|P1],P2,1,Ps):-
+	getPiecesWithDistance(K,D,P1,P2,1,Ps).
+getPiecesWithDistance(K,D,[],P2,1,[]).
+getPiecesWithDistance(K,D,P1,[[C,P]|P2],-1,Ps):-
+	getDistance(K,C,DK),
+	D >= DK,!,
+	getPiecesWithDistance(K,D,P1,P2,-1,Pss),
+	append([[C,P]],Pss,Ps).
+getPiecesWithDistance(K,D,P1,[_|P2],-1,Ps):-
+	getPiecesWithDistance(K,D,P1,P2,-1,Ps).
+getPiecesWithDistance(K,D,P1,[],-1,[]).
+verifMat(Ps,P1,P2,J):-
+	pieceAvailableMoves(Ps,[P1,P2,[],[]],J,LR),
+	execAndVerif(LR, P1, P2, J).
+
+execAndVerif([[P,M] | L], P1, P2, J):-
+	actuallyMovePiece(P,J,[P1,P2,_,_],M,[PP1,PP2,_,_]),
+	getKing(PP1,PP2,J,K),
+	Opp is -J,
+	S is sqrt(2)+1/10,
+	getPiecesWithDistance(K,S,PP1,PP2,Opp,Ps),
+	pieceAvailableMoves(Ps, [PP1, PP2, [], []],Opp,LR),
+	verifCapt(LR,K),
+	execAndVerif(L,P1,P2,J).
+
+execAndVerif([],_,_,_).
+
+verifCapt([],_):-fail,!.
+verifCapt([[_,K]|_],K):-!.
+verifCapt([_|L],K):-
+	verifCapt(L,K).
+
+getDistance([X,Y],[X2,Y2],D):-
+	D is sqrt((X-X2)*(X-X2)+(Y-Y2)*(Y-Y2)).

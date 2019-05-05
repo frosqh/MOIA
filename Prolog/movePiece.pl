@@ -235,19 +235,21 @@ actuallyMovePiece([A,N], J, G, T, GR):-
 	updateGrid(NG,[A,N],J,R,GR).
 
 validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
+	piece(Kodama, kodama),
 	!,
 	B \= 5,
 	validColumn(A,P1).
 
 validKodamaDrop(Kodama, -1,[P2,_,_,_], [A,B]):-
+	piece(Kodama, kodama),
 	!,
 	B \= 5,
 	validColumn(A,P2).
 
 validKodamaDrop(_,_,_,_).
 
-validColumn(A,[]).
-validColumn(A,[[[A,B],1]|_]):-
+validColumn(_,[]).
+validColumn(A,[[[A,_],1]|_]):-
 	!,fail.
-validColumn(A,[T|P]):-
+validColumn(A,[_|P]):-
 	validColumn(A,P).

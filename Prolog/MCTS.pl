@@ -16,14 +16,12 @@
 									%KeyList = La liste des moves fils déjà traités (pour accelérer le traitement UCT)
 									%MoveList = L'arbre des rollouts à partir de ce  noeud
 simu(_, Turn, _,_, L,_,L2, 0) :-
-	Turn > 62,!,incrThroughs(L,L2).
+	Turn > 60,!,incrThroughs(L,L2).
 
 simu(Grid, _, _,_, L,_,L2, Y):-
 	hasWin(Grid,Y),!,incrThroughs(L,L2).
 
-simu(Grid, Turn, Player,MyPlayer, MoveList, ParentThroughs, NewMoveList,Winner):-
-	getMoveList(MoveList, TMP),
-	length(TMP, TR),
+simu(Grid, Turn, Player,MyPlayer, MoveList, _, NewMoveList,Winner):-
 	allAvailablePlays(Grid,Player,Moves),
 	toExpand(Moves,MoveList,MyPlayer,TmpMoveList,[P,T]),
 	actuallyMovePiece(P,Player,Grid,T,GR),
@@ -51,7 +49,7 @@ isTimeout(Depart):-
 simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, MyPlayer, FinalMoveList):-
 	isTimeout(Depart),
 	!,
-	simu(Grid,Turn,FirstPlayer,MyPlayer, MoveList,1,TmpMoveList,Winner),
+	simu(Grid,Turn,FirstPlayer,MyPlayer, MoveList,1,TmpMoveList,_),
 	simuUntilTimeout(Depart, TmpMoveList, Grid, Turn, FirstPlayer,MyPlayer, FinalMoveList).
 
 simuUntilTimeout(_, MoveList, _, _, _,_, MoveList).
@@ -100,7 +98,7 @@ createDrops([T|L],P,LR):-
 	createDrops(L,P,LLR),
 	append([[[[-1,-1],P],T]],LLR,LR).
 
-toExpand(Moves, MoveList, MJ, NewMoveList, MoveToExpand) :-
+toExpand(Moves, MoveList, _, NewMoveList, MoveToExpand) :-
 	getKeyList(MoveList, KeyList),
 	notAlreadyTreated(Moves, KeyList, NotTreatedMoves),
 	NotTreatedMoves \= [],
@@ -110,11 +108,11 @@ toExpand(Moves, MoveList, MJ, NewMoveList, MoveToExpand) :-
 	nth0(Index, NotTreatedMoves,  MoveToExpand),
 	addMove(MoveToExpand, MoveList, NewMoveList).
 
-toExpand(Moves, MoveList, MJ, MoveList, MoveToExpand) :-
+toExpand(_, MoveList, MJ, MoveList, MoveToExpand) :-
 	maxValue(MoveList, MJ, BigMoveToExpand),
 	getMove(BigMoveToExpand, MoveToExpand).
 
-notAlreadyTreated([], KeyList, []).
+notAlreadyTreated([], _, []).
 
 notAlreadyTreated([M|Moves], KeyList, NotTreatedMoves):-
 	\+ member(M, KeyList),
@@ -122,6 +120,6 @@ notAlreadyTreated([M|Moves], KeyList, NotTreatedMoves):-
 	notAlreadyTreated(Moves,KeyList,TmpNotTreatedMoves),
 	append([M], TmpNotTreatedMoves, NotTreatedMoves).
 
-notAlreadyTreated([M|Moves], KeyList, NotTreatedMoves):-
+notAlreadyTreated([_|Moves], KeyList, NotTreatedMoves):-
 	notAlreadyTreated(Moves,KeyList,NotTreatedMoves).
 	
