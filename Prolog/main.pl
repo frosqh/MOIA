@@ -105,7 +105,7 @@ test9(R):-
 %R : Meilleur Move
 %TODO Déterminer mon joueur (Avec une variable MJ par exemple)
 %Pour l'instant, recherche d'un coup gagnant à grand coup 
-testJasper([],[],J,MJ,0,R,LR):-
+testJasper([],[],J,MJ,0,R,LR,Capture):-
 	!,
 	statistics(runtime,[Depart,_]),
 	initialGrid(G),
@@ -118,8 +118,9 @@ testJasper([],[],J,MJ,0,R,LR):-
 	display(Depart, 0),
 	getMaxWinRate(L,P),
 	getMove(P,TR),
+	isCapture(TR, J, G, Capture),
   correct(TR,R).
-testJasper(MoveHistory,MT,J,MJ,T,R,LR):-
+testJasper(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
 	statistics(runtime,[Depart,_]),
 	initialGrid(TG),
 	startPlayer(J,T,FJ),
@@ -134,7 +135,13 @@ testJasper(MoveHistory,MT,J,MJ,T,R,LR):-
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
 	getMove(P,TR),
+	isCapture(TR, J, G, Capture),
   correct(TR,R).
+
+isCapture([_,T],J, G, 1):-
+	Opp is -J,
+	\+ validSuper(T,Opp,G).
+isCapture(_,_,_,0).
 
 getMaxWinRate([M],M):-!.
 getMaxWinRate([M|L],R):-
@@ -201,7 +208,8 @@ testMat :-
 	write(J),nl.
 
 testTestJasper:-
-	testJasper([],[],1,1,0,R,LR),
+	testJasper([],[],1,1,0,R,LR,C),
 	MH = [R],
-	testJasper(MH,LR,-1,1,1,R2,LR2),
-	write(R2),nl.
+	testJasper(MH,LR,-1,1,1,R2,LR2,C2),
+	write(R2),nl,
+	write(C2),nl.
