@@ -131,7 +131,6 @@ testJasper(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
 	simuUntilTimeout(Depart,M,G,T,J,MJ,LR),
 	display(Depart, 0),
 	getThroughs(LR, Throughs),
-	write('Throughs : '),write(Throughs),nl,
 	getMoveList(LR,L),
 	getMaxWinRate(L,P),
 	getMove(P,TR),
@@ -153,17 +152,17 @@ getMaxWinRate([M|L],R):-
 	getMaxMove(M,WM/TM,T,WT/TT,R).
 
 startPlayer(T,J,FJ):-
-	T mod 2 = 1,
+	M is T mod 2,
+	M \= 0,
 	!,
 	FJ is -J.
 
 startPlayer(T,J,J).
 
-reApplyMoves([],_,G,G):-write('Hey ! '),write(G),nl.
+reApplyMoves([],_,G,G).
 
 reApplyMoves([[M,T]|MH],J,TG,G):-
 	correct([M,T],[M2,T2]),
-	write([M2,T2]),nl,
 	actuallyMovePiece(M2,J,TG,T2,GR),
 	Opp is -J,
 	reApplyMoves(MH,Opp,GR,G).
@@ -204,12 +203,11 @@ testMat :-
 				[[4,5],Oni]
 			 ],
 	G = [P1,P2,[],[]],
-	hasWin(G,J),
-	write(J),nl.
+	hasWin(G,J).
 
 testTestJasper:-
-	testJasper([],[],1,1,0,R,LR,C),
+	testJasper([],[],-1,-1,0,R,LR,C),
 	MH = [R],
-	testJasper(MH,LR,-1,1,1,R2,LR2,C2),
+	testJasper(MH,LR,1,-1,1,R2,LR2,C2),
 	write(R2),nl,
 	write(C2),nl.
