@@ -13,6 +13,7 @@
 #include "protocolYokai.h"
 
 
+//une fonction qui fait la réception d'un coup du moteur IA (Java) 
 TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 	int err;
 	TCoupReq coupReq;
@@ -34,6 +35,7 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 		shutdown(socket, SHUT_RDWR); close(socket);
 		exit(-11);
 	}
+	
 	coupReq.idRequest = ntohl(coupJava.idReq);
 	coupReq.numPartie = ntohl(coupJava.numPartie);
 	coupReq.typeCoup = ntohl(coupJava.typeCoup);
@@ -49,6 +51,9 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie){
 	printf("construction coup finie \n");
 	return coupReq;
 }
+
+
+//Fait le traitement de la saisie du nom/sens et rends le sens accordé par le serveur
 
 TSensTetePiece debutPartie(int sock, TPartieReq partieReq, TPartieRep partieRep){
 

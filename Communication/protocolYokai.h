@@ -130,6 +130,17 @@ typedef struct
   
 }Coup;
 
+typedef struct 
+{
+  int originX;
+  int originY;
+  int piece;
+  int destX;
+  int destY;
+  int capture;
+  
+}CoupAdvJava;
+
 #endif
 
 

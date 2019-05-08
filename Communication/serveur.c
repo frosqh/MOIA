@@ -24,8 +24,7 @@ int main(int argc, char **argv){
        port = 0,            /* numero de port */
        sizeAddr,        /* taille de l'adresse d'une socket */
        err,	            /* code d'erreur */
-       boucle1 = 0,
-       select;
+       boucle1 = 0;
     struct sockaddr_in addClient;	/* adresse de la socket client connectee */   
     bool validation = true;    // utilisation de la validation
     bool timeout = true;       // utilisation de la limite deu temps
@@ -118,7 +117,7 @@ int main(int argc, char **argv){
 	}*/
 
 	//Utilisation du multiplexage
-	select = select(FD_SETSIZE, &readSet, NULL, NULL, NULL);
+	err = select(FD_SETSIZE, &readSet, NULL, NULL, NULL);
     if (err < 0) {
       	perror("(serveurSelect) erreur dans select");
       	shutdown(socketConnexion, SHUT_RDWR); close(socketConnexion);

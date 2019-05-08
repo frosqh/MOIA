@@ -22,13 +22,16 @@
 
 
 int main(int argc, char **argv){
-	int sock,port,err,sockJava,portJava;                 
+	int sock,port,err,sockJava,portJava,nbCoups,sensJava;
+	int originXJ,originYJ,pieceJ,destXJ,destYJ;                 
 	char* nomMachServ;       
 	TPartieReq partieReq;
 	TPartieRep partieRep;
 	TCoupReq coupReq,coupReqAdversaire;
 	TSensTetePiece sensAccorde;
 	TCoupRep coupRep,coupRepAdv;
+	CoupAdvJava coupAdvJava; 
+
 		 
 	/* verification des arguments */
 	if (argc != 4) {
@@ -40,7 +43,7 @@ int main(int argc, char **argv){
 	port = atoi(argv[2]);
 	portJava = atoi(argv[3]);
 
-	//etablir en connexion avec l'arbitre
+	//etablir une connexion avec l'arbitre
 	sock = socketClient(nomMachServ, port);
 	if (sock < 0) {
 	    perror("(client) erreur sur la creation de socket");
@@ -58,7 +61,24 @@ int main(int argc, char **argv){
 	//Envoi de la requete Partie (fonction : TSensTetePiece debutPartie(int sock,char nomJoueur[T_NOM],TSensTetePiece sensDemande) )
 	
 	sensAccorde = debutPartie(sock, partieReq, partieRep);
+
+	//indiquer le sens au moteur java
+	if (sensAccorde==SUD) sensJava = -1;
+	else sensJava = 1;
+
+	//envoyer le feu vert a java pour construire le coup 
+	//de preference le send a mettre dans la fonction construireCoup
+	sensJava = htonl(sensJava);
+    err = send(sockJava, &sensJava, sizeof(int), 0);
+	if (err <= 0){
+		perror("(joueur) erreur sur le send coup");
+		shutdown(sockJava, SHUT_RDWR); close(sockJava);
 	
+	}
+	printf("Sens accordé indiqué à Java \n");
+	
+
+
 
 	printf("\n\n");
 	printf("******************************* \n");
@@ -70,14 +90,14 @@ int main(int argc, char **argv){
 		
 		case SUD:
 			
-			printf("** C'est à vous de commencer ** \n");
+			printf("** C'est a vous de commencer ** \n");
 			
 			while(true){
-			
+				
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
 			    coupReq = construireCoup(sockJava,SUD,1);
-			    //de preference le send à mettre dans la fonction construireCoup
+			    //de preference le send a mettre dans la fonction construireCoup
 			    err = send(sock, &coupReq, sizeof(TCoupReq), 0);
 				if (err <= 0){
 						perror("(joueur) erreur sur le send coup");
@@ -104,7 +124,8 @@ int main(int argc, char **argv){
 					if (coupRep.propCoup == NUL) printf("Match nul, il n'y a pas de vianqueur \n");
 					
 					break;
-				} 		
+				}
+
 				
 				//Reception de la reponse validation coup joué par adversaire
 			    //debut
@@ -133,6 +154,34 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					break;
 				}
+
+
+				//Envoi du coup de l'adversaire au Java
+				originXJ = coupReqAdversaire.params.deplPiece.caseDep.c;
+				originYJ = coupReqAdversaire.params.deplPiece.caseDep.l;
+				pieceJ = coupReqAdversaire.piece.typePiece;
+				destXJ = coupReqAdversaire.params.deplPiece.caseArr.c;
+				destYJ = coupReqAdversaire.params.deplPiece.caseArr.l;
+				coupAdvJava.originX = ntohl(originXJ);
+				coupAdvJava.originY = ntohl(originYJ);
+				coupAdvJava.piece = ntohl(pieceJ);
+				coupAdvJava.destX = ntohl(destXJ);
+				coupAdvJava.destY = ntohl(destYJ);
+				coupAdvJava.capture = ntohl(coupReqAdversaire.params.deplPiece.estCapt);
+
+				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
+				if (err <= 0){
+					perror("(joueur) erreur sur le send coup adversaire Java");
+					shutdown(sockJava, SHUT_RDWR); close(sockJava);
+				break;
+				}
+				printf("Coup adversaire envoyé à Java\n");
+
+
+
+
+
+
 
 				
 				
@@ -169,6 +218,27 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					break;
 				}
+				//Envoi du coup de l'adversaire au Java
+				originXJ = coupReqAdversaire.params.deplPiece.caseDep.c;
+				originYJ = coupReqAdversaire.params.deplPiece.caseDep.l;
+				pieceJ = coupReqAdversaire.piece.typePiece;
+				destXJ = coupReqAdversaire.params.deplPiece.caseArr.c;
+				destYJ = coupReqAdversaire.params.deplPiece.caseArr.l;
+				coupAdvJava.originX = ntohl(originXJ);
+				coupAdvJava.originY = ntohl(originYJ);
+				coupAdvJava.piece = ntohl(pieceJ);
+				coupAdvJava.destX = ntohl(destXJ);
+				coupAdvJava.destY = ntohl(destYJ);
+				coupAdvJava.capture = ntohl(coupReqAdversaire.params.deplPiece.estCapt);
+
+				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
+				if (err <= 0){
+					perror("(joueur) erreur sur le send coup adversaire Java");
+					shutdown(sockJava, SHUT_RDWR); close(sockJava);
+				break;
+				}
+				printf("Coup adversaire envoyé à Java\n");
+
 				//Construction d'un coup
 				printf("Construction du coup en cours \n");
 				coupReq = construireCoup(sockJava,NORD,1);
@@ -211,9 +281,10 @@ int main(int argc, char **argv){
 		
 		case NORD:
 			printf("******************************* \n");
-			printf("** C'est à vous de commencer ** \n");
+			printf("** C'est a vous de commencer ** \n");
 			printf("******************************* \n\n");
 			while(true){
+				
 			
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
@@ -269,6 +340,27 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					break;
 				}
+
+				//Envoi du coup de l'adversaire au Java
+				originXJ = coupReqAdversaire.params.deplPiece.caseDep.c;
+				originYJ = coupReqAdversaire.params.deplPiece.caseDep.l;
+				pieceJ = coupReqAdversaire.piece.typePiece;
+				destXJ = coupReqAdversaire.params.deplPiece.caseArr.c;
+				destYJ = coupReqAdversaire.params.deplPiece.caseArr.l;
+				coupAdvJava.originX = ntohl(originXJ);
+				coupAdvJava.originY = ntohl(originYJ);
+				coupAdvJava.piece = ntohl(pieceJ);
+				coupAdvJava.destX = ntohl(destXJ);
+				coupAdvJava.destY = ntohl(destYJ);
+				coupAdvJava.capture = ntohl(coupReqAdversaire.params.deplPiece.estCapt);
+
+				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
+				if (err <= 0){
+					perror("(joueur) erreur sur le send coup adversaire Java");
+					shutdown(sockJava, SHUT_RDWR); close(sockJava);
+				break;
+				}
+				printf("Coup adversaire envoyé à Java\n");
 				
 				
 			}
@@ -305,6 +397,26 @@ int main(int argc, char **argv){
 					shutdown(sock, SHUT_RDWR); close(sock);
 					break;
 				}
+				//Envoi du coup de l'adversaire au Java
+				originXJ = coupReqAdversaire.params.deplPiece.caseDep.c;
+				originYJ = coupReqAdversaire.params.deplPiece.caseDep.l;
+				pieceJ = coupReqAdversaire.piece.typePiece;
+				destXJ = coupReqAdversaire.params.deplPiece.caseArr.c;
+				destYJ = coupReqAdversaire.params.deplPiece.caseArr.l;
+				coupAdvJava.originX = ntohl(originXJ);
+				coupAdvJava.originY = ntohl(originYJ);
+				coupAdvJava.piece = ntohl(pieceJ);
+				coupAdvJava.destX = ntohl(destXJ);
+				coupAdvJava.destY = ntohl(destYJ);
+				coupAdvJava.capture = ntohl(coupReqAdversaire.params.deplPiece.estCapt);
+
+				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
+				if (err <= 0){
+					perror("(joueur) erreur sur le send coup adversaire Java");
+					shutdown(sockJava, SHUT_RDWR); close(sockJava);
+				break;
+				}
+				printf("Coup adversaire envoyé à Java\n");
 				//Construction d'un coup
 				printf("Construction du coup en cours \n");
 				coupReq = construireCoup(sockJava,SUD,2);
