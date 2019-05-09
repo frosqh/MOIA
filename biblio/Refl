@@ -6,4 +6,4 @@ Un élément de jeu de la forme [tour, piecesRouge, piecesBleue] où
 
 On peut alors effecuer la vérification non seulement sur la condition de victoire mais aussi sur le nombre de tours (< 30).
 
-Si on trouve un noeud équivalent déjà existant, on ajoute un arc du parent vers le déjà existant, puis on incrémente le compteur de passage.
+Si on trouve un noeud équivalent déjà existant, on ajoute un arc du parent vers le déjà existant, puis on incrémente le compteur de passage. -> Finalement, cela ne me semble pas des plus simples à mettre en place, sans pour autant être impossible, mais il va y avoir un problème non negligeable au niveau du temps ><
