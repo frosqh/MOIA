@@ -83,11 +83,11 @@ public class EngineSud {
                         try {
 
 
-                            while (i<60) {
+                            while (i<=60) {
                                 //System.out.println(predicat);
                                 //1.1 Construction du coup
                                 System.out.println(predicat);
-                                System.out.println(results);
+                                //System.out.println(results);
                                 Query qu = sp.openQuery(predicat, results);
                                 querys.add(qu);
                                 qu.nextSolution();
@@ -128,7 +128,9 @@ public class EngineSud {
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
-
+                               /* int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver>0)
+                                    break;*/
                                 int originX = ((DataInputStream) in).readInt();
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
@@ -150,6 +152,8 @@ public class EngineSud {
 
 
                             }
+
+                            System.out.println("Hey ! We are here !");
 
                             i = 1;
 
@@ -228,13 +232,11 @@ public class EngineSud {
                         } catch (SPException e) {
                             System.err.println("Exception prolog\n" + e);
                             e.printStackTrace();
-                            break;
                         }
                         // autres exceptions levées par l'utilisation du Query.nextSolution()
                         catch (Exception e) {
                             System.err.println("Other exception : " + e);
                             e.printStackTrace();
-                            break;
                         }
 
 
@@ -258,7 +260,9 @@ public class EngineSud {
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
-
+                                /*int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver>0)
+                                    break;*/
                                 int originX = ((DataInputStream) in).readInt();
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
@@ -407,6 +411,7 @@ public class EngineSud {
 
 
 
+
                             }
 
 
@@ -414,13 +419,11 @@ public class EngineSud {
                         } catch (SPException e) {
                             System.err.println("Exception prolog\n" + e);
                             e.printStackTrace();
-                            break;
                         }
                         // autres exceptions levées par l'utilisation du Query.nextSolution()
                         catch (Exception e) {
                             System.err.println("Other exception : " + e);
                             e.printStackTrace();
-                            break;
                         }
 
 

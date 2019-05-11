@@ -16,7 +16,7 @@
 									%KeyList = La liste des moves fils déjà traités (pour accelérer le traitement UCT)
 									%MoveList = L'arbre des rollouts à partir de ce  noeud
 simu(_, Turn, _,_, L,_,L2, 0) :-
-	Turn > 62,!,incrThroughs(L,L2).
+	Turn > 60,!,incrThroughs(L,L2).
 
 simu(Grid, _, _,_, L,_,L2, Opp):-
 	isCheck(Grid,Y),
@@ -36,7 +36,7 @@ simu(Grid, Turn, Player,MyPlayer, MoveList, _, NewMoveList,Winner):-
 	getMoveList(Tmp2MoveList, TmpNewNewMoveList),
 	changeMoveList([P,T], TmpNewNewMoveList, TmpNewMoveList , UpdatedMoveList),
 	setMoveList(Tmp2MoveList, UpdatedMoveList, CompleteUpdatedMoveList),
-	updateValueWin(CompleteUpdatedMoveList, Winner, NewMoveList).
+	updateValueWin(CompleteUpdatedMoveList, Winner, MyPlayer, NewMoveList).
 	%Ici, on regarde dans notre moveList si on a un move possible qui n'est pas traité à partir de notre Grid
 %Si c'est le cas, on choisi un de ces moves au random
 %Sinon, on utilise les différentes valeurs UCB1 pour choisir le noeud à traiter
@@ -47,7 +47,7 @@ notAlreadyPassedBy([_,_,_,_,_,_,[],[]]).
 isTimeout(Depart):-
 	statistics(runtime, [Fin,_]),
 	Time is (Fin-Depart)/1000,
-	Time < 2.
+	Time < 1.
 
 
 simuUntilTimeout(Depart, MoveList, Grid, Turn, FirstPlayer, MyPlayer, FinalMoveList):-

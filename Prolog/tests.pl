@@ -49,3 +49,33 @@ test('getWinP1 - positive',[true(WinP1 == 5)]):-
 	getWinP1([0,0,5,0,0,0,0,0],WinP1).
 :-end_tests(winP1Test).
 
+:-begin_tests(winP2Test).
+test('incrWinP2 - negative',[true(WinP2 == -1)]):-
+	incrWinP2([0,0,0,-2,0,0,0,0],[0,0,0,WinP2,0,0,0,0]).
+test('incrWinP2 - zero',[true(WinP2 == 1)]):-
+	incrWinP2([0,0,0,0,0,0,0,0],[0,0,0,WinP2,0,0,0,0]).
+test('incrWinP2 - positive',[true(WinP2 == 5)]):-
+	incrWinP2([0,0,0,4,0,0,0,0],[0,0,0,WinP2,0,0,0,0]).
+test('getWinP2 - negative',[true(WinP2 == -2)]):-
+	getWinP2([0,0,0,-2,0,0,0,0],WinP2).
+test('getWinP2 - zero',[true(WinP2 == 0)]):-
+	getWinP2([0,0,0,0,0,0,0,0],WinP2).
+test('getWinP2 - positive',[true(WinP2 == 5)]):-
+	getWinP2([0,0,0,5,0,0,0,0],WinP2).
+:-end_tests(winP2Test).
+
+:-begin_tests(drawTest).
+test('incrDraw - negative',[true(Draw == -1)]):-
+	incrDraw([0,0,0,0,-2,0,0,0],[0,0,0,0,Draw,0,0,0]).
+test('incrDraw - zero',[true(Draw == 1)]):-
+	incrDraw([0,0,0,0,0,0,0,0],[0,0,0,0,Draw,0,0,0]).
+test('incrDraw - positive',[true(Draw == 5)]):-
+	incrDraw([0,0,0,0,4,0,0,0],[0,0,0,0,Draw,0,0,0]).
+test('getDraw - negative',[true(Draw == -2)]):-
+	getDraw([0,0,0,0,-2,0,0,0],Draw).
+test('getDraw - zero',[true(Draw == 0)]):-
+	getDraw([0,0,0,0,0,0,0,0],Draw).
+test('getDraw - positive',[true(Draw == 5)]):-
+	getDraw([0,0,0,0,5,0,0,0],Draw).
+:-end_tests(drawTest).
+

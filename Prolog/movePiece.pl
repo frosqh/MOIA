@@ -217,7 +217,7 @@ availableMovePiece([A,N], J, G, T):-
 	validCoorGrid(T),
 	validSuper(T,J,G),
 	actuallyMovePiece([A,N],J,G,T,GT)
-	,\+ isCheck(G,J).
+	,\+ isCheck(GT,J).
 
 availableDrop(N, J, G, T):-
 	ownDrop(N,J,G),

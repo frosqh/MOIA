@@ -18,7 +18,7 @@
 
 int main(int argc, char **argv){
 
-	int sock,port,err,sockJava,portJava,coupsJoues = 0,sensJava;              
+	int sock,port,err,sockJava,portJava,coupsJoues = 0,sensJava,end=0;              
 	char* nomMachServ;       
 	TPartieReq partieReq;
 	TPartieRep partieRep;
@@ -79,7 +79,7 @@ int main(int argc, char **argv){
 			
 			printf("** C'est a vous de commencer ** \n");
 			
-			while(coupsJoues < NB_COUP_MAX){
+			while(coupsJoues <= NB_COUP_MAX){
 				
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
@@ -110,7 +110,6 @@ int main(int argc, char **argv){
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
     			if(breaker) break;
-
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");
@@ -134,8 +133,8 @@ int main(int argc, char **argv){
 			//reinitialiser les variables
 			breaker = false;
 			coupsJoues = 0;
-
-			while(coupsJoues < NB_COUP_MAX){
+			end=0;
+			while(coupsJoues <= NB_COUP_MAX){
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
     			if(breaker) break;
@@ -143,7 +142,6 @@ int main(int argc, char **argv){
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
     			if(breaker) break;
-
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");
@@ -186,7 +184,7 @@ int main(int argc, char **argv){
 			printf("*** Vous jouez en deuxième **** \n");
 			printf("******************************* \n");
 			//////**************************************
-			while(coupsJoues < NB_COUP_MAX){
+			while(coupsJoues <= NB_COUP_MAX){
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
     			if(breaker) break;
@@ -222,6 +220,7 @@ int main(int argc, char **argv){
 			    receptionValidation(sock,&breaker);
 			    if(breaker) break;
 			}
+
 			
 
 			printf("\n\n");
@@ -234,7 +233,7 @@ int main(int argc, char **argv){
 			breaker = false;
 			coupsJoues = 0;
 
-			while(coupsJoues < NB_COUP_MAX){
+			while(coupsJoues <= NB_COUP_MAX){
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
 			    coupReq = construireCoup(sockJava,NORD,2,&breaker);
@@ -260,7 +259,6 @@ int main(int argc, char **argv){
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
     			if(breaker) break;
-
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");

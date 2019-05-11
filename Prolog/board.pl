@@ -131,11 +131,11 @@ isCheck([P1, P2, _, _], J):-
 	getPiecesWithDistance(K,sqrt(2),P1,P2,Opp,Ps),
 	isAttackable(K, Opp ,Ps).
 
-isAttackable(K, _,[]):-fail,!.
-isAttackable(T, J,[P|Ps]):-
+isAttackable(_, _,[]):-fail,!.
+isAttackable(T, J,[P|_]):-
 	move(P,J,T),
 	!.
-isAttackable(K, J,[P|Ps]):-
+isAttackable(K, J,[_|Ps]):-
 	isAttackable(K,J,Ps).
 
 
@@ -156,7 +156,7 @@ getPiecesWithDistance(K,D,[[C,P]|P1],P2,1,Ps):-
 	append([[C,P]],Pss,Ps).
 getPiecesWithDistance(K,D,[_|P1],P2,1,Ps):-
 	getPiecesWithDistance(K,D,P1,P2,1,Ps).
-getPiecesWithDistance(K,D,[],P2,1,[]).
+getPiecesWithDistance(_,_,[],_,1,[]).
 getPiecesWithDistance(K,D,P1,[[C,P]|P2],-1,Ps):-
 	getDistance(K,C,DK),
 	D >= DK,!,
@@ -164,7 +164,7 @@ getPiecesWithDistance(K,D,P1,[[C,P]|P2],-1,Ps):-
 	append([[C,P]],Pss,Ps).
 getPiecesWithDistance(K,D,P1,[_|P2],-1,Ps):-
 	getPiecesWithDistance(K,D,P1,P2,-1,Ps).
-getPiecesWithDistance(K,D,P1,[],-1,[]).
+getPiecesWithDistance(_,_,_,[],-1,[]).
 verifMat(Ps,P1,P2,J):-
 	pieceAvailableMoves(Ps,[P1,P2,[],[]],J,LR),
 	execAndVerif(LR, P1, P2, J).

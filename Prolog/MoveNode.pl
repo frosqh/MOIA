@@ -37,7 +37,6 @@ incrThroughs([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,ThroughR,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]):-
 	ThroughR is Throughs+1.
 
-
 %:-getThroughs/2
 %Récupère le champ Throughs d'une structure MoveNode
 %getThroughs(MoveNode, Throughs) :
@@ -45,41 +44,67 @@ incrThroughs([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 				%Throughs = Nombre de parcours de ce noeud [O]
 getThroughs([_,Throughs,_,_,_,_,_,_],Throughs).
 
-
-
+%:-incrWinP1/2
+%Renvoie un nouveau MoveNode avec le nombre de victoires du joueur incrémenté
+%incrWinP1(MoveNode, MoveNode1) : 
+				%MoveNode = Noeud d'origine
+				%MoveNode1 = Noeud incrémenté [O]
 incrWinP1([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,Throughs,WiRP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]):-
 	WiRP1 is WinP1+1.
 
+%:-getWinP1/2
+%Récupère le champ WinP1 d'une structure MoveNode
+%getWinP1(MoveNode, WinP1) :
+				%MoveNode = Noeud d'origine
+				%WinP1 = Nombre de parcours gagnant de ce noeud [O]
 getWinP1([_,_,WinP1,_,_,_,_,_],WinP1).
 
+%:-incrWinP2/2
+%Renvoie un nouveau MoveNode avec le nombre de victoires de l'adversaire incrémenté
+%incrWinP2(MoveNode, MoveNode1) : 
+				%MoveNode = Noeud d'origine
+				%MoveNode1 = Noeud incrémenté [O]
 incrWinP2([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,Throughs,WinP1,WiRP2,Draw,ValueUCB1,KeyList,MoveList]):-
 	WiRP2 is WinP2+1.
 
+%:-getWinP2/2
+%Récupère le champ WinP2 d'une structure MoveNode
+%getWinP1(MoveNode, WinP2) :
+				%MoveNode = Noeud d'origine
+				%WinP2 = Nombre de parcours perdant de ce noeud [O]
 getWinP2([_,_,_,WinP2,_,_,_,_],WinP2).
 
+%:-incrDraw/2
+%Renvoie un nouveau MoveNode avec le nombre d'égalités incrémenté
+%incrDraw(MoveNode, MoveNode1) : 
+				%MoveNode = Noeud d'origine
+				%MoveNode1 = Noeud incrémenté [O]
 incrDraw([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,Throughs,WinP1,WinP2,DraR,ValueUCB1,KeyList,MoveList]):-
 	DraR is Draw+1.
 
+%:-getDraw/2
+%Récupère le champ Draw d'une structure MoveNode
+%getWinP1(MoveNode, Draw) :
+				%MoveNode = Noeud d'origine
+				%Draw = Nombre de parcours avec égalité de ce noeud [O]
 getDraw([_,_,_,_,Draw,_,_,_],Draw).
 
+
+%updateValue/3
+%Renvoie un nouveau MoveNode dont la valeur UCB a été mise à jour
+%updateValue(MoveNode, ParentThroughs, MoveNode1) :
+				%MoveNode = Noeud d'origine
+				%ParentThroughs = Nombre de parcours passant par le noeud parent
+				%MoveNode1 = Noeud actualisé
 updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
-						, 1
 						, ParentThroughs
 						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
 	getC(C),
 	getD(D),
 	ValueUCBR is (WinP1/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
-
-updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
-						, -1
-						, ParentThroughs
-						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
-	getC(C),
-	getD(D),
-	ValueUCBR is (WinP2/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
 
 
 getValue([_,_,_,_,_,ValueUCB1,_,_],ValueUCB1).
@@ -93,8 +118,8 @@ maxValueBis([MoveNode],_,_, MoveNode).
 
 maxValueBis([MoveNode | MoveList],MJ, PT, MaxMove):-
 	maxValueBis(MoveList,MJ, PT, TempMaxMove),
-	updateValue(MoveNode,MJ,PT,MoveNode2),
-	updateValue(TempMaxMove,MJ, PT, TempMaxMove2),
+	updateValue(MoveNode,PT,MoveNode2),
+	updateValue(TempMaxMove,PT, TempMaxMove2),
 	getValue(MoveNode2, Value1),
 	getValue(TempMaxMove2, Value2),
 	getMaxMove(MoveNode2,Value1,TempMaxMove2,Value2,MaxMove).
@@ -118,7 +143,7 @@ addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 		append([Move1], KeyList, KeyList1),
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
-getCorrectList(Move,[],[0, 0, 0, 0, 0, 0, [], []]):-!.
+getCorrectList(_,[],[0, 0, 0, 0, 0, 0, [], []]):-!.
 getCorrectList(Move, MoveList, CorrectMoveList):-
 	getMoveList(MoveList, RealMoveList),
 	getCorrectListBis(Move, RealMoveList, CorrectMoveList).
@@ -142,13 +167,14 @@ changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList):-
 	
 %Ici, remplacer la valeur de la moveList par celle en paramètre pour le bon move
 
-updateValueWin(MoveList, 1, NewMoveList):-
+updateValueWin(MoveList, MJ, MJ, NewMoveList):-
 	incrWinP1(MoveList, NewMoveList).
 
-updateValueWin(MoveList, -1, NewMoveList):-
+updateValueWin(MoveList, J, MJ, NewMoveList):-
+	J is -MJ,
 	incrWinP2(MoveList, NewMoveList).
 
-updateValueWin(MoveList, 0, NewMoveList):-
+updateValueWin(MoveList, 0, _, NewMoveList):-
 	incrDraw(MoveList, NewMoveList).
 %En fonction  du winner (ou draw), mettre à jour 
 %la valeur correspondant, puis calculer la value UCB1
