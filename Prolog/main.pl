@@ -9,6 +9,7 @@
 :-['./util.pl'].
 :-['./MoveNode.pl'].
 :-['./MCTS.pl'].
+:-['./tests.pl'].
 
 display(Depart,R):-
 	statistics(runtime,[Fin,_]),
@@ -137,35 +138,50 @@ testJasper(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
 	isCapture(TR, J, G, Capture),
   correct(TR,R).
 
-testJasper2([],[],J,MJ,0,R,LR,Capture):-
+testJasper2([],[],J,MJ,0,R,LRR,Capture):-
 	!,
 	statistics(runtime,[Depart,_]),
 	initialGrid(G),
-	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LR),
-	getThroughs(LR, Throughs),
+	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J,MJ, LLR),
+	getThroughs(LLR, Throughs),
 	getWinP1(LLR,WinP1),
 	getDraw(LLR,Draw),
 	display(Depart, 0),
 	getMoveList(LLR,L),
 	display(Depart, 0),
-	getMaxWinRate(L,LR),
-	getMove(LR,TR),
+	getMaxWinRate(L,LRR),
+	getMove(LRR,TR),
 	isCapture(TR, J, G, Capture),
   correct(TR,R).
-testJasper2(MoveHistory,MT,J,MJ,T,R,LR,Capture):-
+testJasper2(MoveHistory,MT,J,MJ,T,R,LRR,Capture):-
+	%write('Tour du joueur : '),write(J),nl,
+	length(MoveHistory,LM),
+	%write('Taille moveHistory : '),write(LM),nl,
 	statistics(runtime,[Depart,_]),
 	initialGrid(TG),
-	startPlayer(J,T,FJ),
-	reApplyMoves(MoveHistory, FJ, TG, G),
+	startPlayer(T,J,FJ),
+	%write('Start : '),write(FJ),nl,
+	%write('Turn : '),write(T),nl,
+	reverse(MoveHistory, ToApply, []),
+	%write('reversed'),
+	reApplyMoves(ToApply, FJ, TG, G),
+	%write('ReApply : '),write(G),nl,
 	last(MoveHistory,LastMove),
 	correct(LastMove, CorrectedLastMove),
 	getCorrectList(CorrectedLastMove, MT, M),
+	allAvailableMoves(G,J,MR),
+	%write(MR),
 	simuUntilTimeout(Depart,M,G,T,J,MJ,LLR),
-	display(Depart, 0),
+	%display(Depart, 0),
 	getThroughs(LLR, Throughs),
+	%write('Throughs : '),write(Throughs),nl,
 	getMoveList(LLR,L),
-	getMaxWinRate(L,LR),
-	getMove(LR,TR),
+	%write('MoveList'),write(L),nl,
+	getMaxWinRate(L,LRR),
+	%write('MaxWinRate'),
+	%write('MaxWinRate'),nl,
+	getMove(LRR,TR),
+	%write('Move : '),write(TR),nl,
 	isCapture(TR, J, G, Capture),
   correct(TR,R).
 
@@ -174,14 +190,16 @@ isCapture([_,T],J, G, 1):-
 	\+ validSuper(T,Opp,G).
 isCapture(_,_,_,0).
 
-getMaxWinRate([M],M):-!.
 getMaxWinRate([M|L],R):-
 	getMaxWinRate(L,T),
 	getWinP1(M,WM),
 	getThroughs(M,TM),
 	getWinP1(T,WT),
 	getThroughs(T,TT),
-	getMaxMove(M,WM/TM,T,WT/TT,R).
+	ValM is WM/TM,
+	ValT is WT/TT,
+	getMaxMove(M,ValM,T,ValT,R).
+getMaxWinRate([M],M):-!.
 
 startPlayer(T,J,FJ):-
 	M is T mod 2,
@@ -238,8 +256,48 @@ testMat :-
 	hasWin(G,J).
 
 testTestJasper:-
-	testJasper([],[],-1,-1,0,R,LR,C),
+	testJasper2([],[],-1,-1,0,R,LR,C),
+	write('Here :P'),nl,
 	MH = [R],
-	testJasper(MH,LR,1,-1,1,R2,LR2,C2),
+	testJasper2(MH,[],1,1,1,R2,LR2,C2),
+	!,
 	write(R2),nl,
-	write(C2),nl.
+	write(C2),nl,
+	write('There'),nl,
+	MH2 = [R2,R],
+	testJasper2(MH2,LR,-1,-1,2,R3,LR3,C3),
+	testJasper2([R3|MH2],LR2,1,1,3,R4,LR4,C4).
+
+reverse([],Z,Z).
+
+reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).
+
+testFuckingKirin:-
+	piece(Oni, oni),
+	piece(Kodama, kodama),
+	piece(K, koropokkuru),
+	piece(Kirin, kirin),
+	G = [
+				[
+					[[0,0],Oni],
+					[[1,0],Kirin],
+					[[2,0],K],
+					[[3,0],Kirin],
+					[[3,1],Oni],
+					[[1,2],Kodama],
+					[[2,2],Kodama],
+					[[3,3],Kodama],
+					[[3,2],Kodama]
+				],
+				[
+					[[0,5],Oni],
+					[[1,5],Kirin],
+					[[2,4],K],
+					[[3,4],Kirin],
+					[[4,4],Oni],
+					[[1,3],Kodama],
+					[[2,3],Kodama]
+				],[],[]
+			],
+	pieceAvailableMoves([[[3,4],Kirin]],G,-1,L),
+	write(L).

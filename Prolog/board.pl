@@ -80,17 +80,27 @@ dropGrid(N,-1,[P1,P2,C1,C2],T,[P1,P,C1,C]):-
 				%J = Identifiant du joueur
 				%G = Grille de jeu
 				%NG = Grille après retrait de la pièce [O]
-removePieceFromGrid(T,1,[[[T,P]|G],IG,C1,C2],[G,IG,C1,[P|C2]]).
+removePieceFromGrid(T,1,[[[T,P]|G],IG,C1,C2],[G,IG,C1,[P2|C2]]):-
+	downgrade(P,P2).
 removePieceFromGrid(T,1,[[[T2,P2]|G],IG,C1,C2],[NG,IG,C3,C4]):-
 	T \= T2,
 	removePieceFromGrid(T,1,[G,IG,C1,C2],[NNG,IG,C3,C4]),
 	NG = [[T2,P2]|NNG].
-removePieceFromGrid(T,-1,[IG,[[T,P]|G],C1,C2],[IG,G,[P|C1],C2]).
+removePieceFromGrid(T,-1,[IG,[[T,P]|G],C1,C2],[IG,G,[P2|C1],C2]):-
+	downgrade(P,P2).
 removePieceFromGrid(T,-1,[IG,[[T2,P2]|G],C1,C2],[IG,NG,C3,C4]):-
 	T \= T2,
 	removePieceFromGrid(T,-1,[IG,G,C1,C2],[IG,NNG,C3,C4]),
 	NG = [[T2,P2]|NNG].
 
+
+downgrade(P,P2):-
+	piece(KS, kodama_samourai),
+	piece(SO, super_oni),
+	member(P,[KS,SO]),
+	!,
+	P2 is P-1.
+downgrade(P,P).
 
 %:-firstHasWin/2
 %Vérifie si un joueur a gagné la partie (no si aucune victoire)
@@ -114,6 +124,20 @@ hasWin([P1,P2,_,_], Opp):-
 	getPiecesWithDistance(K,2,P1,P2,J,Ps),
 	verifMat(Ps,P1,P2,J),
 	Opp is -J.
+
+isCheck([P1, P2, _, _], J):-
+	getKing(P1,P2,J,K),
+	Opp is -J,
+	getPiecesWithDistance(K,sqrt(2),P1,P2,Opp,Ps),
+	isAttackable(K, Opp ,Ps).
+
+isAttackable(K, _,[]):-fail,!.
+isAttackable(T, J,[P|Ps]):-
+	move(P,J,T),
+	!.
+isAttackable(K, J,[P|Ps]):-
+	isAttackable(K,J,Ps).
+
 
 getKing([[A,Koro]|_],_,1,A):-
 	piece(Koro,koropokkuru),!.

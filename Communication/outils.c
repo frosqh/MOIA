@@ -22,56 +22,71 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie,bool* breaker 
 	err = recv(socket, &coupJava, sizeof(Coup), MSG_PEEK);
     while(err < sizeof(Coup)){
        if (err <= 0) {
+					printf("WUT2 ?!\n");
          perror("(joueur) erreur dans la reception du coup Java");
          shutdown(socket, SHUT_RDWR); close(socket);
         *breaker = true;
     	}
        err = recv(socket, &coupJava, sizeof(Coup), MSG_PEEK);
     }
-
+    printf("Err : %d\n",err);
 	err = recv(socket, &coupJava, sizeof(Coup), 0);
 	if (err <= 0) {
+		printf("WUT ?!\n");
 		perror("(joueur) erreur dans la reception du coup Java");
 		shutdown(socket, SHUT_RDWR); close(socket);
 		*breaker = true;
 	}
-	//Partie commune pour tous les coups
-	coupReq.idRequest = ntohl(coupJava.idReq);
-	coupReq.numPartie = ntohl(coupJava.numPartie);
-	coupReq.typeCoup = ntohl(coupJava.typeCoup);
-	coupReq.piece.sensTetePiece = ntohl(coupJava.sensPiece);
-	coupReq.piece.typePiece = ntohl(coupJava.typePiece);
+	printf("%d\n",coupJava.idReq);
+	printf("%d\n",coupJava.numPartie);
+	printf("%d\n",ntohl(coupJava.numPartie));
 
-	//on teste le type du coup recu de Java
-	switch(coupJava.typeCoup){
+	printf("Breaker : %d\n",*breaker);
 
-		//cas d'un coup DEPLACER
-		case 0 :
-			coupReq.params.deplPiece.caseDep.c = ntohl(coupJava.colonneDep);
-			coupReq.params.deplPiece.caseDep.l = ntohl(coupJava.ligneDep);
-			coupReq.params.deplPiece.caseArr.c = ntohl(coupJava.colonneArr);
-			coupReq.params.deplPiece.caseArr.l = ntohl(coupJava.ligneArr);
-			printf("Coup calculé par l'IA : DEPLACER\n");
-		break;
+	if(! *breaker){
+		printf("Breaker ok !");
+		//Partie commune pour tous les coups
+		coupReq.idRequest = ntohl(coupJava.idReq);
+		coupReq.numPartie = ntohl(coupJava.numPartie);
+		coupReq.typeCoup = ntohl(coupJava.typeCoup);
+		coupReq.piece.sensTetePiece = ntohl(coupJava.sensPiece);
+		coupReq.piece.typePiece = ntohl(coupJava.typePiece);
 
-		//cas d'un coup DEPOSER
-		case 1 :
-			coupReq.params.deposerPiece.c = ntohl(coupJava.colonneArr);
-			coupReq.params.deposerPiece.l = ntohl(coupJava.ligneArr);
-			printf("Coup calculé par l'IA : DEPOSER\n");
-		break;
 
-		default : 
-			*breaker = true;
-			printf("Problème avec le coup recu de l'IA, type de coup inconnu ! Partie quittée\n");
 
-		break;
+		printf("coupReq.idRequest = %d\n",coupReq.idRequest);
+		printf("coupReq.numPartie = %d\n",coupReq.numPartie);
+		//on teste le type du coup recu de Java
+		switch(coupReq.typeCoup){
+
+			//cas d'un coup DEPLACER
+			case 0 :
+				coupReq.params.deplPiece.caseDep.c = ntohl(coupJava.colonneDep);
+				coupReq.params.deplPiece.caseDep.l = ntohl(coupJava.ligneDep);
+				coupReq.params.deplPiece.caseArr.c = ntohl(coupJava.colonneArr);
+				coupReq.params.deplPiece.caseArr.l = ntohl(coupJava.ligneArr);
+				if(ntohl(coupJava.capture)==0) coupReq.params.deplPiece.estCapt = false;
+				else coupReq.params.deplPiece.estCapt = true;
+
+				printf("Coup calculé par l'IA : DEPLACER\n");
+			break;
+
+			//cas d'un coup DEPOSER
+			case 1 :
+				coupReq.params.deposerPiece.c = ntohl(coupJava.colonneArr);
+				coupReq.params.deposerPiece.l = ntohl(coupJava.ligneArr);
+				printf("Coup calculé par l'IA : DEPOSER\n");
+			break;
+
+			default : 
+				*breaker = true;
+				printf("Problème avec le coup recu de l'IA, type de coup inconnu ! Partie quittée\n");
+
+			break;
+		}
+
+		printf("construction coup finie \n");
 	}
-	
-	if(ntohl(coupJava.capture)==0) coupReq.params.deplPiece.estCapt = false;
-	else coupReq.params.deplPiece.estCapt = true;
-
-	printf("construction coup finie \n");
 	return coupReq;
 }
 
@@ -169,3 +184,119 @@ TSensTetePiece debutPartie(int sock, TPartieReq partieReq, TPartieRep partieRep)
 
 	return sensAccorde;
 }
+
+
+//Fonction qui fait la reception de la validation coup adverse + coup adverse
+TCoupReq receptionAdverse(int sock,bool* breaker){
+
+	TCoupReq coupReqAdversaire;
+	TCoupRep coupRepAdv;
+	int err;
+
+	//Reception de la reponse validation coup joué par adversaire
+    
+	printf("Attente coup adversaire...\n");
+	err = recv(sock, &coupRepAdv, sizeof(TCoupRep), 0);
+	if (err <= 0) {
+		perror("(joueur) erreur dans la reception du coup adversaire");
+		shutdown(sock, SHUT_RDWR); close(sock);
+		*breaker = true;
+	}
+
+	if (coupRepAdv.err == ERR_OK && coupRepAdv.validCoup != TRICHE && coupRepAdv.propCoup == CONT) printf("Coup adversaire valide !\n");
+	else{
+		if (coupRepAdv.err == ERR_COUP) printf("Coup adversaire non valide !\n");
+		if (coupRepAdv.validCoup == TRICHE) printf("Coup adversaire triché !\n");
+		if (coupRepAdv.propCoup == GAGNE) printf("L'adversaire a gagné cette partie...\n");
+		if (coupRepAdv.propCoup == PERDU) printf("L'adversaire a perdu cette partie !\n");
+		if (coupRepAdv.propCoup == NUL) printf("Match nul, il n'y a pas de vianqueur \n");
+		*breaker = true;
+	}
+	
+	if(! *breaker){
+		err = recv(sock, &coupReqAdversaire, sizeof(TCoupReq), 0);
+		if (err <= 0) {
+			perror("(joueur) erreur dans la reception du coup adversaire");
+			shutdown(sock, SHUT_RDWR); close(sock);
+			*breaker = true;
+		}
+		printf("Coup adversaire recu\n");
+	}
+	
+	
+
+	return coupReqAdversaire;
+}
+
+//reception de la validation d'un coup
+void receptionValidation(int sock,bool* breaker){
+	
+	TCoupRep coupRep;
+	int err;
+	err = recv(sock, &coupRep, sizeof(TCoupRep), 0);
+	if (err <= 0) {
+		perror("(joueur) erreur dans la reception de la validation coup");
+		shutdown(sock, SHUT_RDWR); close(sock);
+		*breaker = true; 
+	}
+	printf("Hey ! \n");
+	if (! *breaker)
+	{
+		if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT) printf("Coup valide !\n");
+		else{
+			if (coupRep.err == ERR_COUP) printf("Coup non valide !\n");
+			if (coupRep.validCoup == TRICHE) printf("Coup triché !\n");
+			if (coupRep.propCoup == GAGNE) printf("Vous avez gagné cette partie !\n");
+			if (coupRep.propCoup == PERDU) printf("Vous avez perdu cette partie...\n");
+			if (coupRep.propCoup == NUL) printf("Match nul, il n'y a pas de vianqueur \n");
+			*breaker = true;
+		}
+	
+	}
+	
+}
+
+CoupAdvJava construireMove(TCoupReq coupReqAdversaire,bool* breaker){
+
+		CoupAdvJava coupAdvJava;
+		int originXJ,originYJ,destXJ,destYJ,pieceJ;
+
+		if (coupReqAdversaire.typeCoup == DEPLACER){
+			//Envoi du coup de l'adversaire au Java
+			originXJ = coupReqAdversaire.params.deplPiece.caseDep.c;
+			originYJ = coupReqAdversaire.params.deplPiece.caseDep.l;
+			pieceJ = coupReqAdversaire.piece.typePiece;
+			destXJ = coupReqAdversaire.params.deplPiece.caseArr.c;
+			destYJ = coupReqAdversaire.params.deplPiece.caseArr.l;
+
+			coupAdvJava.originX = ntohl(originXJ);
+			coupAdvJava.originY = ntohl(originYJ);
+			coupAdvJava.piece = ntohl(pieceJ);
+			coupAdvJava.destX = ntohl(destXJ);
+			coupAdvJava.destY = ntohl(destYJ);
+			coupAdvJava.capture = ntohl(coupReqAdversaire.params.deplPiece.estCapt);
+		}
+		else{
+			if(coupReqAdversaire.typeCoup == DEPOSER){
+				//Envoi du coup de l'adversaire au Java
+				originXJ = -1;
+				originYJ = 6;
+				pieceJ = coupReqAdversaire.piece.typePiece;
+				destXJ = coupReqAdversaire.params.deposerPiece.c;
+				destYJ = coupReqAdversaire.params.deposerPiece.l;
+
+				coupAdvJava.originX = ntohl(originXJ);
+				coupAdvJava.originY = ntohl(originYJ);
+				coupAdvJava.piece = ntohl(pieceJ);
+				coupAdvJava.destX = ntohl(destXJ);
+				coupAdvJava.destY = ntohl(destYJ);
+				coupAdvJava.capture = 0;
+
+			}
+			else{ *breaker = true;}
+		}
+
+		return coupAdvJava;
+
+}
+

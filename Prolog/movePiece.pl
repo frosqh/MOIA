@@ -16,8 +16,8 @@ moveBackward([X,Y],J,[X,Y2]) :- Y2 is Y-J.
 moveRight([X,Y],J,[X2,Y]) :- X2 is X+J.
 moveLeft([X,Y],J,[X2,Y]) :- X2 is X-J.
 moveForwardRight([X,Y],J,[X2,Y2]) :- X2 is X+J,Y2 is Y+J.
-moveForwardLeft([X,Y],J,[X2,Y2]) :- X2 is X+J,Y2 is Y-J.
-moveBackwardRight([X,Y],J,[X2,Y2]) :- X2 is X-J,Y2 is Y+J.
+moveForwardLeft([X,Y],J,[X2,Y2]) :- X2 is X-J,Y2 is Y+J.
+moveBackwardRight([X,Y],J,[X2,Y2]) :- X2 is X+J,Y2 is Y-J.
 moveBackwardLeft([X,Y],J,[X2,Y2]) :- X2 is X-J,Y2 is Y-J.
 
 %:-moveKd/3
@@ -215,7 +215,9 @@ availableMovePiece([A,N], J, G, T):-
 	own([A,N],J,G),
 	move([A,N],J,T),
 	validCoorGrid(T),
-	validSuper(T,J,G).
+	validSuper(T,J,G),
+	actuallyMovePiece([A,N],J,G,T,GT)
+	,\+ isCheck(G,J).
 
 availableDrop(N, J, G, T):-
 	ownDrop(N,J,G),
@@ -237,13 +239,13 @@ actuallyMovePiece([A,N], J, G, T, GR):-
 validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
-	B \= 5,
+	B < 5,
 	validColumn(A,P1).
 
-validKodamaDrop(Kodama, -1,[P2,_,_,_], [A,B]):-
+validKodamaDrop(Kodama, -1,[_,P2,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
-	B \= 5,
+	B < 5,
 	validColumn(A,P2).
 
 validKodamaDrop(_,_,_,_).

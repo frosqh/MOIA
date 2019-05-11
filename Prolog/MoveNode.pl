@@ -1,17 +1,51 @@
 %MoveNode : [Move, Throughs, WinP1, WinP2, Draw, ValueUCB1, KeyList, MoveList]
 
+%Fichier de définition de la structure MoveNode sous la forme :
+	%[[Move, Throughs, WinP1, WinP2, Draw, ValueUCB1, KeyList, MoveList]*] avec :
+		%Move de la forme [[X,Y],[X2,Y2]] symbolisant un coup traité
+		%Throughs = Le nombre de simulation passant par ce noeud
+		%WinP1 = Le nombre de victoires de P1 après être passé par ce noeud
+		%WinP2 = Le nombre de victoires de P2 après être passé par ce noeud
+		%Draw  = Le nombre d'égalité après être passé par ce noeud
+		%ValueUCB1 = La valeur UCB1 du noeud, afin d'optimiser l'expansion des rollouts
+		%KeyList = La liste des moves fils déjà traités (pour accelérer le traitement UCT)
+		%MoveList = L'arbre des rollouts à partir de ce  noeud
+
+%:-getC/1
+%Fournit la constante utilisée lors du calcul de la valeur UCB1
 getC(C):-
 	C is sqrt(2).
+
+%:-getD/1
+%Fournit la constante déterminant le coefficient d'importance des draws
 getD(D):-
 	D is 1/3.
 
+%:-getMove/2
+%Récupère le champ move d'une structure MoveNode
+%getMove(MoveNode, Move) : 
+				%MoveNode = Noeud de l'arbre de la même forme que ci-dessus
+				%Move = Move du noeud MoveNode [O]
 getMove([Move,_,_,_,_,_,_,_],Move).
 
+%:-incrThroughs/2
+%Renvoie un nouveau ModeNode avec le nombre de parcours incrémenté
+%incrThroughs(MoveNode, MoveNode1) :
+				%MoveNode = Noeud d'origine
+				%MoveNode1 = Noeud incrémenté [O]
 incrThroughs([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,ThroughR,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]):-
 	ThroughR is Throughs+1.
 
+
+%:-getThroughs/2
+%Récupère le champ Throughs d'une structure MoveNode
+%getThroughs(MoveNode, Throughs) :
+				%MoveNode = Noeud de l'arbre de la même forme que ci-dessus
+				%Throughs = Nombre de parcours de ce noeud [O]
 getThroughs([_,Throughs,_,_,_,_,_,_],Throughs).
+
+
 
 incrWinP1([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						,[Move,Throughs,WiRP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]):-
@@ -84,9 +118,12 @@ addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 		append([Move1], KeyList, KeyList1),
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
+getCorrectList(Move,[],[0, 0, 0, 0, 0, 0, [], []]):-!.
 getCorrectList(Move, MoveList, CorrectMoveList):-
 	getMoveList(MoveList, RealMoveList),
 	getCorrectListBis(Move, RealMoveList, CorrectMoveList).
+
+getCorrectListBis(Move, [], [Move, 0, 0, 0, 0, 0, [], []]):-!.
 
 getCorrectListBis(Move, [MoveNode|_], MoveNode):-
 	MoveNode = [Move|_],!.
@@ -119,34 +156,3 @@ updateValueWin(MoveList, 0, NewMoveList):-
 
 
 
-%--------------------------------------------------------------------------
-
-:-begin_tests(throughsTest).
-test('incrThroughs - negative',[true(Throughs == -1)]):-
-	incrThroughs([0,-2,0,0,0,0,0,0],[0,Throughs,0,0,0,0,0,0]).
-test('incrThroughs - zero',[true(Throughs == 1)]):-
-	incrThroughs([0,0,0,0,0,0,0,0],[0,Throughs,0,0,0,0,0,0]).
-test('incrThroughs - positive',[true(Throughs == 5)]):-
-	incrThroughs([0,4,0,0,0,0,0,0],[0,Throughs,0,0,0,0,0,0]).
-test('getThroughs - negative',[true(Throughs == -2)]):-
-	getThroughs([0,-2,0,0,0,0,0,0],Throughs).
-test('getThroughs - zero',[true(Throughs == 0)]):-
-	getThroughs([0,0,0,0,0,0,0,0],Throughs).
-test('getThroughs - positive',[true(Throughs == 5)]):-
-	getThroughs([0,5,0,0,0,0,0,0],Throughs).
-:-end_tests(throughsTest).
-
-:-begin_tests(winP1Test).
-test('incrWinP1 - negative',[true(WinP1 == -1)]):-
-	incrThroughs([0,0,-2,0,0,0,0,0],[0,0,WinP1,0,0,0,0,0]).
-test('incrWinP1 - zero',[true(WinP1 == 1)]):-
-	incrThroughs([0,0,0,0,0,0,0,0],[0,0,WinP1,0,0,0,0,0]).
-test('incrWinP1 - positive',[true(WinP1 == 5)]):-
-	incrThroughs([0,0,4,0,0,0,0,0],[0,0,WinP1,0,0,0,0,0]).
-test('getWinP1 - negative',[true(WinP1 == -2)]):-
-	getThroughs([0,0,-2,0,0,0,0,0],WinP1).
-test('getWinP1 - zero',[true(WinP1 == 0)]):-
-	getThroughs([0,0,0,0,0,0,0,0],WinP1).
-test('getWinP1 - positive',[true(WinP1 == 5)]):-
-	getThroughs([0,0,5,0,0,0,0,0],WinP1).
-:-end_tests(winP1Test).
