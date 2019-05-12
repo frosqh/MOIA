@@ -34,3 +34,8 @@ yToString(2,"4").
 yToString(3,"3").
 yToString(4,"2").
 yToString(5,"1").
+
+%reverse/3
+%Renverse une liste
+reverse([],Z,Z).
+reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).

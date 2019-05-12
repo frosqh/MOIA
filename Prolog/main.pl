@@ -165,41 +165,6 @@ testJasper2(MoveHistory,MT,J,MJ,T,R,LRR,Capture):-
 	isCapture(TR, J, G, Capture),
   correct(TR,R).
 
-isCapture([_,T],J, G, 1):-
-	Opp is -J,
-	\+ validSuper(T,Opp,G).
-isCapture(_,_,_,0).
-
-getMaxWinRate([M|L],R):-
-	getMaxWinRate(L,T),
-	getWinP1(M,WM),
-	getThroughs(M,TM),
-	getWinP1(T,WT),
-	getThroughs(T,TT),
-	ValM is WM/TM,
-	ValT is WT/TT,
-	getMaxMove(M,ValM,T,ValT,R).
-getMaxWinRate([M],M):-!.
-
-startPlayer(T,J,FJ):-
-	M is T mod 2,
-	M \= 0,
-	!,
-	FJ is -J.
-
-startPlayer(_,J,J).
-
-reApplyMoves([],_,G,G).
-
-reApplyMoves([[M,T]|MH],J,TG,G):-
-	correct([M,T],[M2,T2]),
-	actuallyMovePiece(M2,J,TG,T2,GR),
-	Opp is -J,
-	reApplyMoves(MH,Opp,GR,G).
-
-correct([[[A,B],C],[D,E]],[[[A,F],C],[D,G]]):-
-	F is 5-B,
-	G is 5-E.
 	
 genFile(J,MJ):-
 	initialGrid(G),
@@ -235,7 +200,3 @@ testMat :-
 	G = [P1,P2,[],[]],
 	hasWin(G,J),
 	write(J),nl.
-
-reverse([],Z,Z).
-
-reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).

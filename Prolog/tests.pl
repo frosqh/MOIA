@@ -7,6 +7,14 @@ test('coorToString - 0,0 -> 1,0', [true(S == "A6B6")]):-
 test('coorToString - 4,5 -> 4,4', [true(S == "E1E2")]):-
 	coorToString([4,5],[4,4],S).
 :-end_tests(coorToStringTest).
+:-begin_tests(reverseTest).
+test('reverse - empty',[true(S==[])]):-
+	reverse([],S,[]).
+test('reverse - one element',[true(S==[1])]):-
+	reverse([1],S,[]).
+test('reverse - two element',[true(S==[1,2])]):-
+	reverse([2,1],S,[]).
+:-end_tests(reverseTest).
 
 %----------------------------------
 %				Units Tests MoveNode.pl

@@ -211,6 +211,15 @@ movePiece([A,N],J,G,GR):-
 	attack(R,J,G,NG),
 	updateGrid(NG,[A,N],J,R,GR).
 
+%:-availableMovePiece/4
+%Renvoie un déplacement possible d'une pièce
+%availableMovePiece(P,J,G,T) :
+				%P = Pièce sous la forme [C,I] : 
+						%C = Coordonnées de la pièce
+						%I = Identifiant de la pièce
+				%J = Identifiant du joueur
+				%G = Grille de jeu
+				%T = déplacement suggéré [O]
 availableMovePiece([A,N], J, G, T):-
 	own([A,N],J,G),
 	move([A,N],J,T),
@@ -219,6 +228,15 @@ availableMovePiece([A,N], J, G, T):-
 	actuallyMovePiece([A,N],J,G,T,GT)
 	,\+ isCheck(GT,J).
 
+%:-availableDrop/4
+%Renvoie un drop possible d'une pièce
+%availableDrop(P,J,G,T) :
+				%P = Pièce sous la forme [C,I] : 
+						%C = Coordonnées de la pièce
+						%I = Identifiant de la pièce
+				%J = Identifiant du joueur
+				%G = Grille de jeu
+				%T = Drop suggéré [O]
 availableDrop(N, J, G, T):-
 	ownDrop(N,J,G),
 	gridCase(T),
@@ -227,29 +245,48 @@ availableDrop(N, J, G, T):-
 	validSuper(T,Opp,G),
 	validKodamaDrop(N, J, G, T).
 
+%:-actuallyMovePiece/5
+%Déplace et upgrade si besoin une pièce
+%movePiece(P,J,G,T,GR) :
+				%P = Pièce sous la forme [C,I] : 
+						%C = Coordonnées de la pièce
+						%I = Identifiant de la pièce
+				%J = Identifiant du joueur
+				%G = Grille de jeu
+				%T = Coordonnées d'arrivées du coup
+				%GR = Grille de jeu après mouvement [O]
 actuallyMovePiece([[-1,-1],N],J,G,T,GR):-
 	!,
 	dropGrid(N, J, G, T, GR).
-
 actuallyMovePiece([A,N], J, G, T, GR):-
 	upgrade([T,N], J, R),
 	attack(R,J,G,NG),
 	updateGrid(NG,[A,N],J,R,GR).
 
+%:-validKodamaDrop/4
+%Vérifie qu'un kodama n'est pas parachuté sur une colonne possédant déjà un kodama
+%validKodamaDrop(P, J, G, T) :
+				%P = Identifiant de la pièce
+				%J = Identifiant du joueur
+				%G = Grille de jeu
+				%T = Coordonnées de drop
 validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
 	B < 5,
 	validColumn(A,P1).
-
 validKodamaDrop(Kodama, -1,[_,P2,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
 	B < 5,
 	validColumn(A,P2).
-
 validKodamaDrop(_,_,_,_).
 
+%:-validColumn/2
+%Vérifie qu'il n'y a pas de kodama sur la colonne donnée
+%validColumn(A,L) :
+				%A = Numéro de colonne
+				%L = Liste de pièces
 validColumn(_,[]).
 validColumn(A,[[[A,_],1]|_]):-
 	!,fail.

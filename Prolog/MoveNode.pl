@@ -98,7 +98,7 @@ getDraw([_,_,_,_,Draw,_,_,_],Draw).
 %updateValue(MoveNode, ParentThroughs, MoveNode1) :
 				%MoveNode = Noeud d'origine
 				%ParentThroughs = Nombre de parcours passant par le noeud parent
-				%MoveNode1 = Noeud actualisé
+				%MoveNode1 = Noeud actualisé [O]
 updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
 						, ParentThroughs
 						,[Move,Throughs,WinP1,WinP2,Draw,ValueUCBR,KeyList,MoveList]):-
@@ -107,15 +107,32 @@ updateValue([Move,Throughs,WinP1,WinP2,Draw,_,KeyList,MoveList]
 	ValueUCBR is (WinP1/Throughs) + C*sqrt(log(ParentThroughs)/Throughs) + D*(Draw/Throughs).
 
 
+%:-getValue/2
+%Récupère le champ Value d'une structure MoveNode
+%getValue(MoveNode, ValueUCB1) :
+				%MoveNode = Noeud d'origine
+				%ValueUCB1 = Valeur de ce noeud, calculée à partir de la formule UCB [O]
 getValue([_,_,_,_,_,ValueUCB1,_,_],ValueUCB1).
 
+%:-maxValuee/3
+%Récupère le moveNode avec la plus haute valueUCB de la liste
+%maxValue(MoveList, J, MaxMove) :
+				%MoveList = MoveNode, contenant la liste à suivre
+				%J = Identifiant de joueur
+				%MaxMove = Noeud avec la valeur maximum [O]
 maxValue(MoveList, MJ, MaxMove):-
 	getMoveList(MoveList,MoveListMoveList),
 	getThroughs(MoveList, PT),
 	maxValueBis(MoveListMoveList,MJ, PT,MaxMove).
 
+%:-maxValueBis/4
+%Récupère le moveNode avec la plus haute valueUCB de la liste
+%maxValueBis(MoveList, J, PT, MaxMove) :
+				%MoveList = Liste de MoveNode
+				%J = Identifiant de joueur
+				%PT = Valeur du champ Throughs pour le noeud parent
+				%MaxMove = Noeud avec la valeur maximum [O]
 maxValueBis([MoveNode],_,_, MoveNode).
-
 maxValueBis([MoveNode | MoveList],MJ, PT, MaxMove):-
 	maxValueBis(MoveList,MJ, PT, TempMaxMove),
 	updateValue(MoveNode,PT,MoveNode2),
@@ -124,61 +141,106 @@ maxValueBis([MoveNode | MoveList],MJ, PT, MaxMove):-
 	getValue(TempMaxMove2, Value2),
 	getMaxMove(MoveNode2,Value1,TempMaxMove2,Value2,MaxMove).
 
+%:-getMaxMove/5
+%Récupère le move associé à la plus grande valeur
+%getMaxMove(Move1, Value1, Move2, Value2, MoveR) :
+				%Move1 = Premier move
+				%Value1 = Valeur associée au premier move
+				%Move2 = Secod move
+				%Value2 = Valeur associée au second move
+				%MoveR = Move dont la valeur associée est la plus grande [O]
 getMaxMove(Move1, Value1, _, Value2, Move1):-
 	Value1 >= Value2.
-
 getMaxMove(_, Value1, Move2, Value2, Move2):-
 	Value1 < Value2.
 
+%:-getKeyList/2
+%Récupère le champ KeyList d'une structure MoveNode
+%getKeyList(MoveNode, KeyList) :
+				%MoveNode = Noeud d'origine
+				%KeyList = Liste des moves traités de ce noeud. [O]
 getKeyList([_,_,_,_,_,_,KeyList,_],KeyList).
 
+
+%:-getMoveList/2
+%Récupère le champ MoveList d'une structure MoveNode
+%getMoveList(MoveNode, KeyList) :
+				%MoveNode = Noeud d'origine
+				%MoveList = Fils de ce noeud. [O]
 getMoveList([_,_,_,_,_,_,_,MoveList],MoveList).
 
+
+%:-setMoveList/3
+%Redéfinit la valeur MoveList d'une moveNode
+%setMoveList(MoveNode, MoveList, MoveNode2) : 
+				%MoveNode = Noeud d'origine
+				%MoveList = Liste à rajouter
+				%MoveNode2 = Noeud redéfini [O]
 setMoveList([Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,_],
 						MoveListBis,
 						[Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveListBis]).
 
+%:-addMove/3
+%Rajouter un move à la moveList en lui associant une nouvelle structure moveNode
+%addMove(Move, MoveNode1, MoveNode2) :
+				%Move = Le move à rajouter
+				%MoveNode1 = Le noeud d'origine
+				%MoveNode2 = Le noeud une fois le move rajouté. [O]
 addMove(Move1, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList,MoveList]
 						, [Move,Throughs,WinP1,WinP2,Draw,ValueUCB1,KeyList1,MoveListBis]):-
 		append([Move1], KeyList, KeyList1),
 		append([[Move1, 0, 0, 0, 0, 0, [], []]],MoveList,MoveListBis).
 	
+%:-getCorrectList/3
+%Renvoie la liste associée au coup donné dans le noeud donné
+%getCorrectList(Move, MoveNode, CorrectMoveNode) : 
+				%Move = Le noeud à retrouver
+				%MoveNode = Le noeud d'origine/parent
+				%CorrectMoveNode = Le fils de MoveNode associé à Move [O]
 getCorrectList(_,[],[0, 0, 0, 0, 0, 0, [], []]):-!.
 getCorrectList(Move, MoveList, CorrectMoveList):-
 	getMoveList(MoveList, RealMoveList),
 	getCorrectListBis(Move, RealMoveList, CorrectMoveList).
 
+%:-getCorrectListBis/3
+%Renvoie la liste associée au coup donné dans la liste de coup donné
+%getCorrectListBis(Move, MoveList, CorrectMoveNode) : 
+				%Move = Le noeud à retrouver
+				%MoveList = La liste de noeud
+				%CorrectMoveNode = Le noeud correspondant à Move [O]
 getCorrectListBis(Move, [], [Move, 0, 0, 0, 0, 0, [], []]):-!.
-
 getCorrectListBis(Move, [MoveNode|_], MoveNode):-
 	MoveNode = [Move|_],!.
-
 getCorrectListBis(Move, [_|MoveList], CorrectMoveList):-
 	getCorrectListBis(Move, MoveList, CorrectMoveList).
 
+
+%:-changeMoveList/4
+%Remplace la moveList associé à un move donné
+%changeMoveList(Move, MoveList, ToAddMoveList, ResMoveList) :
+				%Move = Le noeud à modifier
+				%MoveList = La liste des noeuds
+				%ToAddMoveList = La liste à rajouter
+				%ResMoveList = La MoveList initiale dont le noeud associée à Move est ToAddMoveList [O]
 changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList) :-
 	MoveNode = [Move|_],
 	!,
 	ResMoveList = [ToAddMoveList | MoveList].
-
 changeMoveList(Move, [MoveNode|MoveList], ToAddMoveList, ResMoveList):-
 	changeMoveList(Move,MoveList,ToAddMoveList,TMoveList),
 	append([MoveNode],TMoveList, ResMoveList).
 	
-%Ici, remplacer la valeur de la moveList par celle en paramètre pour le bon move
-
+%:-updateValueWin/4
+%Actualise la valeur du MoveNode dépendemment de la victoire/défaite
+%updateValueWin(MoveNode, W, J, NewMoveNode) : 
+				%MoveNode = noeud d'origine
+				%W = Identifiant du vainqueur
+				%J = Identifiant du joueur représenté par l'IA
+				%NewMoveNode = noeud dont la valeur a été modifiée [O]
 updateValueWin(MoveList, MJ, MJ, NewMoveList):-
 	incrWinP1(MoveList, NewMoveList).
-
 updateValueWin(MoveList, J, MJ, NewMoveList):-
 	J is -MJ,
 	incrWinP2(MoveList, NewMoveList).
-
 updateValueWin(MoveList, 0, _, NewMoveList):-
 	incrDraw(MoveList, NewMoveList).
-%En fonction  du winner (ou draw), mettre à jour 
-%la valeur correspondant, puis calculer la value UCB1
-
-
-
-
