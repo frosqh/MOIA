@@ -171,32 +171,3 @@ genFile(J,MJ):-
 	statistics(runtime,[Depart,_]),
 	simuUntilTimeout(Depart, [0,0,0,0,0,0,[],[]], G, 0, J, MJ, LR),
 	write(LR).
-
-testMat :-
-	piece(Kodama, kodama),
-	piece(Oni, oni),
-	piece(SO, super_oni),
-	piece(KP, koropokkuru),
-	piece(KI, kirin),
-	piece(KS, kodama_samourai),
-
-	P1 = [
-				[[0,2],Kodama],
-				[[0,3],Oni],
-				[[1,4],SO],
-				[[3,0],KP],
-				[[3,1],KI],
-				[[3,3],Oni]
-			 ],
-	P2 = [
-				[[0,0],KS],
-				[[1,1],KS],
-				[[1,2],KI],
-				[[2,2],Kodama],
-				[[2,5],KP],
-				[[3,5],KI],
-				[[4,5],Oni]
-			 ],
-	G = [P1,P2,[],[]],
-	hasWin(G,J),
-	write(J),nl.
