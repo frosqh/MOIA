@@ -22,29 +22,21 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie,bool* breaker 
 	err = recv(socket, &coupJava, sizeof(Coup), MSG_PEEK);
     while(err < sizeof(Coup)){
        if (err <= 0) {
-					printf("WUT2 ?!\n");
          perror("(joueur) erreur dans la reception du coup Java");
          shutdown(socket, SHUT_RDWR); close(socket);
         *breaker = true;
     	}
        err = recv(socket, &coupJava, sizeof(Coup), MSG_PEEK);
     }
-    printf("Err : %d\n",err);
 	err = recv(socket, &coupJava, sizeof(Coup), 0);
 	if (err <= 0) {
-		printf("WUT ?!\n");
 		perror("(joueur) erreur dans la reception du coup Java");
 		shutdown(socket, SHUT_RDWR); close(socket);
 		*breaker = true;
 	}
-	printf("%d\n",coupJava.idReq);
-	printf("%d\n",coupJava.numPartie);
-	printf("%d\n",ntohl(coupJava.numPartie));
 
-	printf("Breaker : %d\n",*breaker);
 
 	if(! *breaker){
-		printf("Breaker ok !");
 		//Partie commune pour tous les coups
 		coupReq.idRequest = ntohl(coupJava.idReq);
 		coupReq.numPartie = ntohl(coupJava.numPartie);
@@ -54,8 +46,6 @@ TCoupReq construireCoup(int socket,TSensTetePiece sens,int partie,bool* breaker 
 
 
 
-		printf("coupReq.idRequest = %d\n",coupReq.idRequest);
-		printf("coupReq.numPartie = %d\n",coupReq.numPartie);
 		//on teste le type du coup recu de Java
 		switch(coupReq.typeCoup){
 
@@ -239,7 +229,6 @@ void receptionValidation(int sock,bool* breaker){
 		shutdown(sock, SHUT_RDWR); close(sock);
 		*breaker = true; 
 	}
-	printf("Hey ! \n");
 	if (! *breaker)
 	{
 		if (coupRep.err == ERR_OK && coupRep.validCoup != TRICHE && coupRep.propCoup == CONT) printf("Coup valide !\n");

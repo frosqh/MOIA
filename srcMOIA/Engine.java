@@ -8,8 +8,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 
+import static java.lang.Thread.sleep;
 
-public class EngineSud {
+
+public class Engine {
 
 
     public static void main(String[] args) throws IOException {
@@ -19,7 +21,7 @@ public class EngineSud {
         SICStus sp = null;
 
         ServerSocket srv;
-        
+
         List<Query> querys = new ArrayList<>();
 
 
@@ -84,20 +86,12 @@ public class EngineSud {
 
 
                             while (i<=60) {
-                                //System.out.println(predicat);
                                 //1.1 Construction du coup
-                                System.out.println(predicat);
-                                //System.out.println(results);
                                 Query qu = sp.openQuery(predicat, results);
                                 querys.add(qu);
                                 qu.nextSolution();
-                                /*for (Object key : results.keySet()){
-                                    System.out.println(key);
-                                }*/
                                 SPTerm R = (SPTerm) results.get("R"+i);
                                 SPTerm capture = (SPTerm) results.get("Capture"+i);
-                                //System.out.println(capture);
-                                //System.out.println(R);
                                 int cap = (int) capture.getInteger();
 
                                 //1.2 Creation du Move
@@ -128,10 +122,12 @@ public class EngineSud {
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
-                               /* int isItOver = ((DataInputStream) in).readInt();
-                                if (isItOver>0)
-                                    break;*/
-                                int originX = ((DataInputStream) in).readInt();
+                                int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver == 666){
+                                    break;
+                                }
+
+                                int originX = isItOver;
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
                                 int destX = ((DataInputStream) in).readInt();
@@ -153,7 +149,6 @@ public class EngineSud {
 
                             }
 
-                            System.out.println("Hey ! We are here !");
 
                             i = 1;
 
@@ -170,43 +165,48 @@ public class EngineSud {
 
                             while (i<60) {
 
-                                //1.1 Reception du coup de l'adversaire
+                                //3.1 Reception du coup de l'adversaire
                                 Move moveAdv = null ;
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
+                                int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver == 666){
+                                    break;
+                                }
+                                int originX = isItOver;
 
-                                int originX = ((DataInputStream) in).readInt();
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
                                 int destX = ((DataInputStream) in).readInt();
                                 int destY = ((DataInputStream) in).readInt();
                                 int capAdv = ((DataInputStream) in).readInt();
 
-                                //1.2 Creation du Move de l'adversaire
-                                moveAdv = new Move(new Coordinate(originX,originY),piece,new Coordinate(destX,destY),sp);
-
                                 //4.1 TODO : Ajout du Move dans MH après l'avoir transformer en terme
-                                //4.2 TODO : Rajouter capture dans le Move adv ?
-                                moveHistory = (SPTerm) results.get("MH"+i);
+                                //4.2 TODO : Rajouter capture dans le Move ?
+                                moveHistory = (SPTerm) results.get("MH"+(i==1?0:(i-2)));
                                 SPTerm bis = new SPTerm(sp);
                                 bis = bis.consList(moveAdv.toTerm(), moveHistory);
-                                results.put("LR"+(i+2), results.get("LR"+i));
-                                results.put("MH"+(i+2), bis);
-                                predicat = "testJasper2(MH"+i+",LR"+i+","+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture"+i+").";
+                                //results.put("LR"+(i+2), results.get("LR"+i));
+                                results.put("MH"+i, bis);
+                                predicat = "testJasper2(MH"+i+",LR"+i+","+sens+","+sens+","+i+",R"+(i+2)+",LR"+(i+2)+",Capture"+(i+2)+").";
+                                i+=2;
 
 
-                                //3.1 Construction du coup
+                                //1.1 Construction du coup
                                 Query qu = sp.openQuery(predicat, results);
                                 qu.nextSolution();
                                 SPTerm R = (SPTerm) results.get("R"+i);
                                 SPTerm capture = (SPTerm) results.get("Capture"+i);
                                 int cap = (int) capture.getInteger();
 
-                                //3.2 Creation du Move
+                                //1.2 Creation du Move
                                 Move move = new Move((Term) results.get("R" + i),sp);
                                 System.out.println("Votre coup : "+move);
-
+                                moveHistory = (SPTerm) results.get("MH"+(i-2));
+                                SPTerm tmp;
+                                tmp = (SPTerm) sp.consList(move.toTerm(),moveHistory);
+                                results.put("MH"+(i-2),tmp);
 
                                 //4 Envoi du Move au joueur
 
@@ -214,7 +214,7 @@ public class EngineSud {
                                 DataOutputStream dos = new DataOutputStream(os);
 
                                 dos.writeInt(1); // id de la requqete toujour 1 pour COUP
-                                dos.writeInt(1); // numero de la partie (1 ou 2)
+                                dos.writeInt(2); // numero de la partie (1 ou 2)
                                 dos.writeInt((move.getOrigin().getX()==-1)?1:0); //type de coup provisoire (0 toujours pour DEPLACER)
                                 dos.writeInt(1); //sens SUD
                                 dos.writeInt(move.getPieceType() - 1);
@@ -223,7 +223,7 @@ public class EngineSud {
                                 dos.writeInt(move.getDest().getX());
                                 dos.writeInt(move.getDest().getY());
                                 dos.writeInt(cap); // capture (0 pour un coup sans Capture)
-                                i = i+2;
+
 
                             }
 
@@ -242,7 +242,7 @@ public class EngineSud {
 
 
                     }
-                break;
+                    break;
 
                 case 1 :
                     i = 1;
@@ -260,28 +260,24 @@ public class EngineSud {
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
-                                /*int isItOver = ((DataInputStream) in).readInt();
-                                if (isItOver>0)
-                                    break;*/
-                                int originX = ((DataInputStream) in).readInt();
+                                int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver == 666){
+                                    break;
+                                }
+
+                                int originX = isItOver;
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
                                 int destX = ((DataInputStream) in).readInt();
                                 int destY = ((DataInputStream) in).readInt();
                                 int capAdv = ((DataInputStream) in).readInt();
 
-                                System.out.println(originX + "->" + destX);
-
                                 //3.2 Creation du Move de l'adversaire
                                 moveAdv = new Move(new Coordinate(originX,originY),piece,new Coordinate(destX,destY),sp);
 
                                 //4.1 TODO : Ajout du Move dans MH après l'avoir transformer en terme
                                 //4.2 TODO : Rajouter capture dans le Move ?
-                                for (Object key : results.keySet())
-                                    System.out.println(key);
-                                System.out.println(i);
                                 moveHistory = (SPTerm) results.get("MH"+(i==1?0:(i-2)));
-                                System.out.println(i==1?0:(i-2));
                                 SPTerm bis = new SPTerm(sp);
                                 bis = bis.consList(moveAdv.toTerm(), moveHistory);
                                 //results.put("LR"+(i+2), results.get("LR"+i));
@@ -292,18 +288,14 @@ public class EngineSud {
 
 
                                 //1.1 Construction du coup
-                                System.out.println("Pred : "+predicat);
                                 Query qu = sp.openQuery(predicat, results);
-                                System.out.println(results);
                                 qu.nextSolution();
-                                //System.out.println(results);
                                 SPTerm R = (SPTerm) results.get("R"+i);
                                 SPTerm capture = (SPTerm) results.get("Capture"+i);
                                 int cap = (int) capture.getInteger();
 
                                 //1.2 Creation du Move
                                 Move move = new Move((Term) results.get("R" + i),sp);
-                                System.out.println("Votre coup : "+move);
                                 moveHistory = (SPTerm) results.get("MH"+(i-2));
                                 SPTerm tmp;
                                 tmp = (SPTerm) sp.consList(move.toTerm(),moveHistory);
@@ -342,7 +334,6 @@ public class EngineSud {
 
                             results = new HashMap();
                             moveHistory = new SPTerm(sp);
-                            results.put("MH0",moveHistory);
 
                             predicat = "testJasper2([],[],"+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture"+i+").";
 
@@ -383,8 +374,12 @@ public class EngineSud {
                                 is = s.getInputStream();
                                 in = new DataInputStream(is);
 
+                                int isItOver = ((DataInputStream) in).readInt();
+                                if (isItOver == 666){
+                                    break;
+                                }
 
-                                int originX = ((DataInputStream) in).readInt();
+                                int originX = isItOver;
                                 int originY = ((DataInputStream) in).readInt();
                                 int piece = ((DataInputStream) in).readInt()+1;
                                 int destX = ((DataInputStream) in).readInt();
@@ -431,22 +426,13 @@ public class EngineSud {
                     }
 
 
-                break;
+                    break;
 
 
 
 
 
 
-            }
-
-            while (i<1e5) {
-                try {
-                    sp.query("write('Hey'),nl.",new HashMap());
-                } catch (SPException e) {
-                    e.printStackTrace();
-                }
-                i+=1;
             }
         }
 

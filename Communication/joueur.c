@@ -84,13 +84,21 @@ int main(int argc, char **argv){
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
 			    coupReq = construireCoup(sockJava,SUD,1,&breaker);
-			    if (breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 			    //envoi du coup au serveur
 			    err = send(sock, &coupReq, sizeof(TCoupReq), 0);
-			    printf("err : %d\n",err);
-			    printf("%d\n",coupReq.numPartie);
-			   	printf("\n");
 				if (err <= 0){
 						perror("(joueur) erreur sur le send coup");
 						shutdown(sock, SHUT_RDWR); close(sock);
@@ -101,15 +109,48 @@ int main(int argc, char **argv){
     			
     			//reception de la validation 
 			    receptionValidation(sock,&breaker);
-			    if(breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }	
 				
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");
@@ -137,11 +178,33 @@ int main(int argc, char **argv){
 			while(coupsJoues <= NB_COUP_MAX){
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");
@@ -152,7 +215,18 @@ int main(int argc, char **argv){
 				//Construction d'un coup
 				printf("Construction du coup en cours \n");
 				coupReq = construireCoup(sockJava,SUD,2,&breaker);
-				if (breaker) break;
+				if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 				//envoyer le coup au serveur
 				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
@@ -164,7 +238,18 @@ int main(int argc, char **argv){
 				printf("Coup construit et envoyé\n");
     			//reception de la validation 
 			    receptionValidation(sock,&breaker);
-			    if(breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 			}
 
 		break;
@@ -187,11 +272,33 @@ int main(int argc, char **argv){
 			while(coupsJoues <= NB_COUP_MAX){
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }	
 
     			//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
     			
 				
     			//envoi du move au Jasper
@@ -206,7 +313,18 @@ int main(int argc, char **argv){
 				//Construction d'un coup
 				printf("Construction du coup en cours... \n");
 				coupReq = construireCoup(sockJava,NORD,1,&breaker);
-				if (breaker) break;
+				if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 				err = send(sock, &coupReq, sizeof(TCoupReq), 0);
 				if (err <= 0){
 						perror("(joueur) erreur sur le send coup");
@@ -218,7 +336,18 @@ int main(int argc, char **argv){
 
     			//reception de la validation 
 			    receptionValidation(sock,&breaker);
-			    if(breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }	
 			}
 
 			
@@ -237,7 +366,18 @@ int main(int argc, char **argv){
 				//Construction d'un coup (Java)
 				printf("Construction du coup en cours \n");
 			    coupReq = construireCoup(sockJava,NORD,2,&breaker);
-			    if (breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 			    //envoi du coup
 			    err = send(sock, &coupReq, sizeof(TCoupReq), 0);
 				if (err <= 0){
@@ -250,15 +390,48 @@ int main(int argc, char **argv){
 
 			    //reception de la validation 
 			    receptionValidation(sock,&breaker);
-			    if(breaker) break;
+			    if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 
 				//Construction d'un Move pour Jasper
     			coupAdvJava = construireMove(coupReqAdversaire,&breaker);
-    			if(breaker) break;
+    			if(breaker){
+			    	int stop = 666;
+			    	stop = ntohl(stop);
+			    	err = send(sockJava, &stop, sizeof(int), 0);
+					if (err <= 0){
+						perror("(joueur) erreur sur le send coup adversaire Java");
+						shutdown(sockJava, SHUT_RDWR); close(sockJava);
+					break;
+					}
+
+			    	break;
+			    }
 				err = send(sockJava, &coupAdvJava, sizeof(CoupAdvJava), 0);
 				if (err <= 0){
 					perror("(joueur) erreur sur le send coup adversaire Java");
