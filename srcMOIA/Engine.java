@@ -29,6 +29,7 @@ public class Engine {
 
         try{
             int port;
+            System.out.println(args.length);
             if (args.length ==0) {
                 System.out.println("Saisir le port à utiliser : ");
                 Scanner scan = new Scanner(System.in);
@@ -48,7 +49,7 @@ public class Engine {
                 sp = new SICStus();
 
                 // Chargement d'un fichier prolog .pl
-                sp.load("~/M1Besancon/MOIA/projet/Prolog/main.pl");
+                sp.load("../Prolog/main.pl");
             }
             // exception déclanchée par SICStus lors de la création de l'objet sp
             catch (SPException e) {
