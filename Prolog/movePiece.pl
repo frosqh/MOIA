@@ -276,12 +276,12 @@ actuallyMovePiece([A,N], J, G, T, GR):-
 validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
-	B > 0,
+	B < 5,
 	validColumn(A,P1).
 validKodamaDrop(Kodama, -1,[_,P2,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
-	B < 5,
+	B > 0,
 	validColumn(A,P2).
 validKodamaDrop(_,_,_,_).
 
