@@ -2,7 +2,7 @@
 
 set -e
 
-export LD_LIBRARY_PATH=/applis/sicstus-3.11.2/lib/
+export LD_LIBRARY_PATH=/usr/local/sicstus4.4.1/lib/
 
 cd Communication/
 
@@ -12,11 +12,14 @@ cd ..
 
 cd srcMOIA/
 
-javac -cp "/applis/sicstus-3.11.2/lib/sicstus-3.11.2/bin/jasper.jar" *.java
+javac -cp /usr/local/sicstus4.4.1/lib/sicstus-4.4.1/bin/jasper.jar *.java
+jar cvfm Engine.jar otherMF/META-INF/MANIFEST.MF *.class
+nohup java -jar Engine.jar $1 &
 
-java "/applis/sicstus-3.11.2/lib/sicstus-3.11.2/bin/jasper.jar" Engine &
+sleep 1
 
 cd ../
 
-./Communication/joueur $1
+./Communication/joueur $2 $3 $1
 
+fg

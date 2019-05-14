@@ -226,7 +226,8 @@ availableMovePiece([A,N], J, G, T):-
 	validCoorGrid(T),
 	validSuper(T,J,G),
 	actuallyMovePiece([A,N],J,G,T,GT)
-	,\+ isCheck(GT,J).
+	,\+ isCheck(GT,J)
+	.
 
 %:-availableDrop/4
 %Renvoie un drop possible d'une pièce
@@ -243,7 +244,9 @@ availableDrop(N, J, G, T):-
 	Opp is -J,
 	validSuper(T,J,G),
 	validSuper(T,Opp,G),
-	validKodamaDrop(N, J, G, T).
+	validKodamaDrop(N, J, G, T),
+	dropGrid(N,J,G,T,GT),
+	\+isCheck(GT,J).
 
 %:-actuallyMovePiece/5
 %Déplace et upgrade si besoin une pièce
@@ -273,7 +276,7 @@ actuallyMovePiece([A,N], J, G, T, GR):-
 validKodamaDrop(Kodama, 1, [P1,_,_,_], [A,B]):-
 	piece(Kodama, kodama),
 	!,
-	B < 5,
+	B > 0,
 	validColumn(A,P1).
 validKodamaDrop(Kodama, -1,[_,P2,_,_], [A,B]):-
 	piece(Kodama, kodama),

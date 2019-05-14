@@ -27,6 +27,18 @@ simu(Grid, _, _,_, L,_,L2, Opp):-
 	Opp is -Y,
 	hasWin(Grid,Opp),!,incrThroughs(L,L2).
 
+simu(Grid, _, _,_, L,_,L2, Opp):-
+	Grid = [P1,_,[],_],
+	length(P1,1),
+	Opp is -1,
+	allAvailablePlays(Grid, 1, []),!,incrThroughs(L,L2).
+
+simu(Grid, _, _,_, L,_,L2, Opp):-
+	Grid = [_,P2,_,[]],
+	length(P2,1),
+	Opp is 1,
+	allAvailablePlays(Grid, -1, []),!,incrThroughs(L,L2).
+
 simu(Grid, Turn, Player,MyPlayer, MoveList, _, NewMoveList,Winner):-
 	allAvailablePlays(Grid,Player,Moves),
 	toExpand(Moves,MoveList,MyPlayer,TmpMoveList,[P,T]),

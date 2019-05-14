@@ -39,3 +39,11 @@ yToString(5,"1").
 %Renverse une liste
 reverse([],Z,Z).
 reverse([H|T],Z,Acc) :- reverse(T,Z,[H|Acc]).
+
+%deleteSingle/3
+%Retire un seul élément de la liste
+deleteSingle([],_,[]).
+deleteSingle([X|L],X,L):-
+	!.
+deleteSingle([P|L],X,[P|LR]):
+	deleteSingle(L,X,LR).

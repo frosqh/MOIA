@@ -14,6 +14,8 @@ import static java.lang.Thread.sleep;
 public class Engine {
 
 
+    private static boolean query;
+
     public static void main(String[] args) throws IOException {
 
         String predicat = new String("");
@@ -26,9 +28,15 @@ public class Engine {
 
 
         try{
-            System.out.println("Saisir le port à utiliser : ");
-            Scanner scan = new Scanner(System.in);
-            srv = new ServerSocket(scan.nextInt());
+            int port;
+            if (args.length ==0) {
+                System.out.println("Saisir le port à utiliser : ");
+                Scanner scan = new Scanner(System.in);
+                port = scan.nextInt();
+            } else {
+                port = Integer.valueOf(args[0]);
+            }
+            srv = new ServerSocket(port);
             System.out.println("En attente de connexion...");
             Socket s = srv.accept();
             System.out.println("Connexion établie.");
@@ -41,7 +49,6 @@ public class Engine {
 
                 // Chargement d'un fichier prolog .pl
                 sp.load("~/M1Besancon/MOIA/projet/Prolog/main.pl");
-
             }
             // exception déclanchée par SICStus lors de la création de l'objet sp
             catch (SPException e) {
@@ -77,7 +84,7 @@ public class Engine {
                 //4 on le push dans MH
                 //revenir sur 1
                 case -1 :
-                    predicat = "testJasper2([],[],"+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture"+i+").";
+                    predicat = "testJasper2([],"+sens+","+sens+","+i+",R"+i+",Capture"+i+").";
 
                     // boucle pour saisir les informations
                     while (!predicat.equals("halt.")) {
@@ -85,9 +92,11 @@ public class Engine {
                         try {
 
 
-                            while (i<=60) {
+                            while (i<60) {
                                 //1.1 Construction du coup
+                                System.out.println(predicat);
                                 Query qu = sp.openQuery(predicat, results);
+                                System.out.println(results);
                                 querys.add(qu);
                                 qu.nextSolution();
                                 SPTerm R = (SPTerm) results.get("R"+i);
@@ -144,11 +153,10 @@ public class Engine {
                                 bis = (SPTerm) sp.consList(moveAdv.toTerm(), tmp);
                                 results.put("MH"+(i+2), bis);
                                 i = i+2;
-                                predicat = "testJasper2(MH"+i+",LR"+(i-2)+","+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture"+i+").";
+                                predicat = "testJasper2(MH"+i+","+sens+","+sens+","+i+",R"+i+",Capture"+i+").";
 
 
                             }
-
 
                             i = 1;
 
@@ -172,6 +180,9 @@ public class Engine {
 
                                 int isItOver = ((DataInputStream) in).readInt();
                                 if (isItOver == 666){
+                                    System.out.println("Erf ! ");
+
+                                    System.exit(0);
                                     break;
                                 }
                                 int originX = isItOver;
@@ -182,14 +193,17 @@ public class Engine {
                                 int destY = ((DataInputStream) in).readInt();
                                 int capAdv = ((DataInputStream) in).readInt();
 
+                                moveAdv = new Move(new Coordinate(originX,originY),piece,new Coordinate(destX,destY),sp);
+
                                 //4.1 TODO : Ajout du Move dans MH après l'avoir transformer en terme
                                 //4.2 TODO : Rajouter capture dans le Move ?
                                 moveHistory = (SPTerm) results.get("MH"+(i==1?0:(i-2)));
+
                                 SPTerm bis = new SPTerm(sp);
                                 bis = bis.consList(moveAdv.toTerm(), moveHistory);
                                 //results.put("LR"+(i+2), results.get("LR"+i));
                                 results.put("MH"+i, bis);
-                                predicat = "testJasper2(MH"+i+",LR"+i+","+sens+","+sens+","+i+",R"+(i+2)+",LR"+(i+2)+",Capture"+(i+2)+").";
+                                predicat = "testJasper2(MH"+i+","+sens+","+sens+","+i+",R"+(i+2)+",Capture"+(i+2)+").";
                                 i+=2;
 
 
@@ -280,13 +294,14 @@ public class Engine {
                                 moveHistory = (SPTerm) results.get("MH"+(i==1?0:(i-2)));
                                 SPTerm bis = new SPTerm(sp);
                                 bis = bis.consList(moveAdv.toTerm(), moveHistory);
-                                //results.put("LR"+(i+2), results.get("LR"+i));
                                 results.put("MH"+i, bis);
-                                predicat = "testJasper2(MH"+i+",LR"+i+","+sens+","+sens+","+i+",R"+(i+2)+",LR"+(i+2)+",Capture"+(i+2)+").";
+                                predicat = "testJasper2(MH"+i+","+sens+","+sens+","+i+",R"+(i+2)+",Capture"+(i+2)+").";
 
                                 i+=2;
 
 
+                                System.out.println(predicat);
+                                System.out.println(results);
                                 //1.1 Construction du coup
                                 Query qu = sp.openQuery(predicat, results);
                                 qu.nextSolution();
@@ -335,7 +350,7 @@ public class Engine {
                             results = new HashMap();
                             moveHistory = new SPTerm(sp);
 
-                            predicat = "testJasper2([],[],"+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture"+i+").";
+                            predicat = "testJasper2([],"+sens+","+sens+","+i+",R"+i+",Capture"+i+").";
 
                             while (i<60) {
 
@@ -394,11 +409,10 @@ public class Engine {
                                 moveHistory = (SPTerm) results.get("MH"+i);
                                 SPTerm bis = new SPTerm(sp);
                                 bis = bis.consList(moveAdv.toTerm(), moveHistory);
-                                results.put("LR"+(i+2), results.get("LR"+i));
                                 results.put("MH"+(i+2), bis);
 
                                 i = i+2;
-                                predicat = "testJasper2(MH"+i+",LR"+i+","+sens+","+sens+","+i+",R"+i+",LR"+i+",Capture).";
+                                predicat = "testJasper2(MH"+i+","+sens+","+sens+","+i+",R"+i+",Capture).";
 
 
 
@@ -426,6 +440,7 @@ public class Engine {
                     }
 
 
+
                     break;
 
 
@@ -435,6 +450,7 @@ public class Engine {
 
             }
         }
+
 
 
 

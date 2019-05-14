@@ -18,7 +18,7 @@
 
 int main(int argc, char **argv){
 
-	int sock,port,err,sockJava,portJava,coupsJoues = 0,sensJava,end=0;              
+	int sock,port,err,sockJava,portJava,coupsJoues = 0,sensJava;              
 	char* nomMachServ;       
 	TPartieReq partieReq;
 	TPartieRep partieRep;
@@ -88,6 +88,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -113,6 +114,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -128,6 +130,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -143,6 +146,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -174,7 +178,6 @@ int main(int argc, char **argv){
 			//reinitialiser les variables
 			breaker = false;
 			coupsJoues = 0;
-			end=0;
 			while(coupsJoues <= NB_COUP_MAX){
 				//reception validation adverse + coup adverse
     			coupReqAdversaire = receptionAdverse(sock,&breaker);
@@ -182,6 +185,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -197,6 +201,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -219,6 +224,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -242,6 +248,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -276,6 +283,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -291,6 +299,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -317,6 +326,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -340,6 +350,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -370,6 +381,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -394,6 +406,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -409,6 +422,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);
@@ -424,6 +438,7 @@ int main(int argc, char **argv){
 			    	int stop = 666;
 			    	stop = ntohl(stop);
 			    	err = send(sockJava, &stop, sizeof(int), 0);
+			    	breaker = false;
 					if (err <= 0){
 						perror("(joueur) erreur sur le send coup adversaire Java");
 						shutdown(sockJava, SHUT_RDWR); close(sockJava);

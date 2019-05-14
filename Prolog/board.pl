@@ -75,10 +75,10 @@ updateGrid([IG,[P2|G],C1,C2],P,-1,NP,GR):-
 				%T = Coordonnées de parachutage
 				%NG = Grille après parachutage [O]
 dropGrid(N,1,[P1,P2,C1,C2],T,[P,P2,C,C2]):-
-	delete(C1,N,C),
+	deleteSingle(C1,N,C),
 	append([[T,N]],P1,P).
 dropGrid(N,-1,[P1,P2,C1,C2],T,[P1,P,C1,C]):-
-	delete(C2,N,C),
+	deleteSingle(C2,N,C),
 	append([[T,N]],P2,P).
 
 
@@ -140,10 +140,10 @@ hasWin([P1,P2,_,_], Opp):-
 	%Récupérer les coordonnées du roi de J
 	%Regarder tous les moves des pièces de J dans un rayon de 2 du roi + plus le roi (pour tous, il doit y avoir capture possible par -J tout de même)
 	%Regarder les moves de toutes les pièces de -J dans un rayon du 1 de nouveau roi
+	J is -Opp,
 	getKing(P1,P2,J,K),
 	getPiecesWithDistance(K,2,P1,P2,J,Ps),
-	verifMat(Ps,P1,P2,J),
-	Opp is -J.
+	verifMat(Ps,P1,P2,J).
 
 %:-isCheck/2
 %Vérifie si un joueur est en echec
@@ -153,7 +153,7 @@ hasWin([P1,P2,_,_], Opp):-
 isCheck([P1, P2, _, _], J):-
 	getKing(P1,P2,J,K),
 	Opp is -J,
-	getPiecesWithDistance(K,sqrt(2),P1,P2,Opp,Ps), %sqrt(2) pour diagonale
+	getPiecesWithDistance(K,sqrt(2)+1/10,P1,P2,Opp,Ps), %sqrt(2) pour diagonale
 	isAttackable(K, Opp ,Ps).
 
 %:-isAttackable/3
@@ -233,11 +233,13 @@ verifMat(Ps,P1,P2,J):-
 execAndVerif([[P,M] | L], P1, P2, J):-
 	actuallyMovePiece(P,J,[P1,P2,_,_],M,[PP1,PP2,_,_]),
 	getKing(PP1,PP2,J,K),
-	Opp is -J,
-	S is sqrt(2)+1/10,
-	getPiecesWithDistance(K,S,PP1,PP2,Opp,Ps),
-	pieceAvailableMoves(Ps, [PP1, PP2, [], []],Opp,LR),
-	verifCapt(LR,K),
+	%Opp is -J,
+	%S is sqrt(2)+1/10,
+	%getPiecesWithDistance(K,S,PP1,PP2,Opp,Ps),
+	%pieceAvailableMoves(Ps, [PP1, PP2, [], []],Opp,LR),
+	%verifCapt(LR,K),
+	%execAndVerif(L,P1,P2,J).
+	isCheck([PP1,PP2,_,_],J),
 	execAndVerif(L,P1,P2,J).
 execAndVerif([],_,_,_).
 
